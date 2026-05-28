@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/shield-alert.svg" alt="Aetheris Logo" width="120" height="120">
+  <img src="assets/logo.svg" alt="Aetheris Logo" width="120" height="120">
   <h1 align="center">AETHERIS</h1>
   <p align="center">
     <strong>Next-Generation Autonomous Multimodal AI Cyber Defense Platform</strong>
