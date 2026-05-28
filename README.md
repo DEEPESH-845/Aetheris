@@ -254,10 +254,8 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  <br/>
-  <img src="assets/logo.svg" width="50" height="50" alt="Aetheris Mini Logo">
-  <h2>AETHERIS</h2>
-  <p><b>Defend at Machine Speed.</b></p>
+
+  <p><b>Defend at God Speed.</b></p>
   
   <p align="center">
     <a href="#">
