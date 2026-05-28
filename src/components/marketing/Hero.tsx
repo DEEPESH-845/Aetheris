@@ -27,7 +27,7 @@ export function Hero() {
             className="flex items-center gap-2 mb-6 border border-neon-cyan/30 bg-neon-cyan/5 px-3 py-1.5 rounded-sm"
           >
             <ShieldCheck className="w-4 h-4 text-neon-cyan" />
-            <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-neon-cyan">Venture-Backed Autonomous SOC</span>
+            <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-neon-cyan">Autonomous SOC</span>
           </motion.div>
           
           <motion.h1 
@@ -37,7 +37,7 @@ export function Hero() {
             className="text-5xl md:text-6xl lg:text-7xl font-outfit font-bold tracking-tighter leading-[1.1] text-white mb-6"
           >
             Defend at <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">Machine Speed.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">God Speed.</span>
           </motion.h1>
           
           <motion.p 
@@ -60,7 +60,7 @@ export function Hero() {
                 Initialize Sandbox
               </CyberButton>
             </Link>
-            <Link href="#architecture" className="w-full sm:w-auto">
+            <Link href="/architecture" className="w-full sm:w-auto">
               <CyberButton variant="ghost" className="w-full sm:w-auto px-8 py-4 text-sm">
                 Read Architecture
               </CyberButton>

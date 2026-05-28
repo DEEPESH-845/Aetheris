@@ -25,7 +25,7 @@
 
 ## ⚡ Vision Statement
 
-Modern cyber warfare operates at machine speed; human-in-the-loop Security Operations Centers (SOC) are fundamentally obsolete against automated zero-day campaigns. **Aetheris** is designed to shift the paradigm from reactive monitoring to **deterministic, autonomous orchestration**.
+Modern cyber warfare operates at god speed; human-in-the-loop Security Operations Centers (SOC) are fundamentally obsolete against automated zero-day campaigns. **Aetheris** is designed to shift the paradigm from reactive monitoring to **deterministic, autonomous orchestration**.
 
 Built with the engineering rigor of a DARPA initiative and the scalability of a venture-backed infrastructure platform, Aetheris acts as the digital nervous system for enterprise security. It ingests multimodal telemetry across hybrid-cloud environments, correlates threat vectors using advanced AI agents (LangGraph/vLLM), and physically alters network topologies via Kubernetes and Cilium eBPF to neutralize threats—all in milliseconds.
 

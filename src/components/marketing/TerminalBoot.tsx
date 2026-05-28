@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Terminal, Lock, Unlock, Fingerprint, Activity } from 'lucide-react';
+import { Terminal, Lock, Unlock, Fingerprint, Loader2 } from 'lucide-react';
 import { CyberButton } from '@/components/core/CyberButton';
 
 const bootSequence = [
@@ -15,6 +15,8 @@ const bootSequence = [
   "SYSTEM ONLINE. AWAITING AUTHORIZATION."
 ];
 
+const springTransition = { type: "spring", bounce: 0, duration: 0.8 };
+
 export function TerminalBoot() {
   const router = useRouter();
   const [bootIndex, setBootIndex] = useState(0);
@@ -24,10 +26,10 @@ export function TerminalBoot() {
 
   useEffect(() => {
     if (bootIndex < bootSequence.length) {
-      const timer = setTimeout(() => setBootIndex(prev => prev + 1), 600 + Math.random() * 400);
+      const timer = setTimeout(() => setBootIndex(prev => prev + 1), 400 + Math.random() * 300);
       return () => clearTimeout(timer);
     } else {
-      setTimeout(() => setBootComplete(true), 500);
+      setTimeout(() => setBootComplete(true), 400);
     }
   }, [bootIndex]);
 
@@ -37,101 +39,152 @@ export function TerminalBoot() {
       setAuthSuccess(true);
       setTimeout(() => {
         router.push('/dashboard');
-      }, 1500);
-    }, 2000);
+      }, 1200);
+    }, 1800);
   };
 
   return (
-    <div className="w-full h-full min-h-[320px] bg-cyber-darker border border-white/10 rounded-sm relative overflow-hidden flex flex-col font-mono shadow-[0_0_40px_rgba(0,243,255,0.05)]">
+    <motion.div 
+      layoutId="terminal-boot-container"
+      transition={springTransition}
+      className="w-full h-full min-h-[320px] bg-[#050505] border border-white/5 rounded-xl relative overflow-hidden flex flex-col font-mono shadow-[0_0_80px_rgba(0,243,255,0.03)]"
+    >
       {/* Terminal Header */}
-      <div className="h-8 bg-black/60 border-b border-white/10 flex items-center px-4 gap-2">
-        <div className="flex gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
-          <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
-          <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
+      <div className="h-10 bg-white/[0.02] border-b border-white/5 flex items-center px-4 gap-3 backdrop-blur-md z-20 relative">
+        <div className="flex gap-2">
+          <div className="w-3 h-3 rounded-full bg-white/10 hover:bg-neon-red/80 transition-colors" />
+          <div className="w-3 h-3 rounded-full bg-white/10 hover:bg-yellow-400/80 transition-colors" />
+          <div className="w-3 h-3 rounded-full bg-white/10 hover:bg-neon-green/80 transition-colors" />
         </div>
-        <span className="text-[10px] text-white/40 font-mono tracking-widest uppercase ml-2">aetheris-core-v9.4.2</span>
+        <span className="text-[10px] text-white/30 font-mono tracking-widest uppercase ml-2 flex items-center gap-2">
+          <Terminal className="w-3 h-3" />
+          aetheris-core-v9.4.2
+        </span>
       </div>
 
       {/* Terminal Body */}
-      <div className="p-6 relative flex-1 flex flex-col justify-center">
-        {/* Scanline inside panel */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.3)_50%)] bg-[length:100%_4px] opacity-20 pointer-events-none" />
+      <div className="p-8 relative flex-1 flex flex-col justify-center overflow-hidden">
+        {/* Subtle glowing orb in background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-neon-cyan/5 rounded-full blur-[80px] pointer-events-none" />
         
         <AnimatePresence mode="wait">
           {!bootComplete ? (
             <motion.div 
               key="booting"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-2 relative z-10"
+              initial={{ opacity: 0, filter: "blur(10px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, filter: "blur(10px)", y: -20 }}
+              transition={springTransition}
+              className="space-y-3 relative z-10"
             >
-              <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-2">
-                <Terminal className="w-4 h-4 text-neon-magenta" />
-                <span className="text-neon-magenta uppercase text-xs">Boot Sequence Initiated</span>
+              <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                >
+                  <Loader2 className="w-4 h-4 text-neon-cyan" />
+                </motion.div>
+                <span className="text-neon-cyan uppercase text-xs tracking-widest">Boot Sequence Initiated</span>
               </div>
               {bootSequence.slice(0, bootIndex).map((line, i) => (
                 <motion.div 
                   key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-[11px] md:text-xs text-text-secondary"
+                  initial={{ opacity: 0, x: -10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  transition={{ type: "spring", bounce: 0, duration: 0.5 }}
+                  className="text-xs md:text-sm text-text-secondary tracking-wide"
                 >
-                  &gt; {line}
+                  <span className="text-neon-magenta/70 mr-2">&gt;</span> {line}
                 </motion.div>
               ))}
               {bootIndex < bootSequence.length && (
                 <motion.div 
                   animate={{ opacity: [1, 0] }} 
-                  transition={{ repeat: Infinity, duration: 0.8 }}
-                  className="text-neon-cyan text-xs inline-block"
+                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                  className="text-neon-cyan text-sm inline-block ml-2"
                 >
-                  _
+                  █
                 </motion.div>
               )}
             </motion.div>
           ) : (
             <motion.div 
               key="auth"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center h-full space-y-6 relative z-10"
+              initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              transition={{ type: "spring", bounce: 0.2, duration: 0.8, delay: 0.1 }}
+              className="flex flex-col items-center justify-center h-full relative z-10"
             >
               {!authenticating ? (
-                <>
-                  <div className="text-center">
-                    <Lock className="w-12 h-12 text-neon-cyan mx-auto mb-4 opacity-80" />
-                    <p className="text-sm text-text-secondary mb-1">SYSTEM LOCKED</p>
-                    <p className="text-[10px] md:text-xs text-text-muted">Biometric or Key verification required</p>
+                <motion.div 
+                  layout
+                  className="flex flex-col items-center"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={springTransition}
+                    className="relative mb-8 cursor-default"
+                  >
+                    <div className="absolute inset-0 bg-neon-cyan/20 blur-xl rounded-full" />
+                    <div className="w-20 h-20 rounded-full border border-white/10 bg-black flex items-center justify-center relative z-10">
+                      <Lock className="w-8 h-8 text-neon-cyan" strokeWidth={1.5} />
+                    </div>
+                  </motion.div>
+                  <div className="text-center mb-8">
+                    <h2 className="text-xl font-outfit font-light text-white tracking-widest mb-2">SYSTEM LOCKED</h2>
+                    <p className="text-xs text-text-muted uppercase tracking-widest">Biometric verification required</p>
                   </div>
-                  <CyberButton onClick={handleAuth} variant="primary" className="w-full max-w-[200px]" icon={<Fingerprint className="w-4 h-4" />}>
-                    Authenticate
+                  <CyberButton 
+                    onClick={handleAuth} 
+                    variant="primary" 
+                    className="w-[240px] h-12 shadow-[0_0_20px_rgba(0,243,255,0.15)] group"
+                  >
+                    <span className="flex items-center justify-center gap-3">
+                      <Fingerprint className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                      AUTHENTICATE
+                    </span>
                   </CyberButton>
-                </>
+                </motion.div>
               ) : (
-                <div className="flex flex-col items-center justify-center space-y-4">
+                <motion.div 
+                  layout
+                  className="flex flex-col items-center justify-center h-[200px]"
+                >
                   {authSuccess ? (
                     <motion.div 
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
+                        initial={{ scale: 0.5, opacity: 0, filter: "blur(20px)" }}
+                        animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+                        transition={{ type: "spring", bounce: 0.5, duration: 0.6 }}
                         className="flex flex-col items-center"
                     >
-                      <Unlock className="w-16 h-16 text-neon-green mb-4 drop-shadow-[0_0_15px_rgba(57,255,20,0.5)]" />
-                      <p className="text-neon-green font-bold tracking-widest uppercase text-sm">Access Granted</p>
+                      <div className="relative mb-6">
+                         <div className="absolute inset-0 bg-neon-green/30 blur-2xl rounded-full" />
+                         <div className="w-24 h-24 rounded-full border border-neon-green/30 bg-black flex items-center justify-center relative z-10">
+                           <Unlock className="w-10 h-10 text-neon-green" strokeWidth={1.5} />
+                         </div>
+                      </div>
+                      <p className="text-neon-green font-outfit font-light tracking-[0.2em] uppercase text-lg">Access Granted</p>
                     </motion.div>
                   ) : (
-                    <>
-                      <Activity className="w-12 h-12 text-neon-magenta animate-spin" />
-                      <p className="text-neon-magenta text-[10px] md:text-xs animate-pulse">Verifying Credentials...</p>
-                    </>
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex flex-col items-center gap-6"
+                    >
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full border-t-2 border-r-2 border-neon-cyan animate-spin" />
+                        <div className="w-12 h-12 rounded-full border-b-2 border-l-2 border-neon-magenta animate-[spin_2s_reverse_infinite] absolute top-2 left-2" />
+                        <Fingerprint className="w-6 h-6 text-white/50 absolute top-5 left-5 opacity-50 pulse" />
+                      </div>
+                      <p className="text-white/60 text-xs font-mono tracking-[0.2em] animate-pulse">VERIFYING NEURAL SIGNATURE...</p>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
               )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }
