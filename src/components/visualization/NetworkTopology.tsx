@@ -16,11 +16,14 @@ const nodeIcons = {
 
 // Fixed positions for the mock network to make it look like a clean enterprise architecture
 const nodePositions: Record<string, { x: number, y: number }> = {
-  'fw-1': { x: 20, y: 50 },
-  'web-cluster-1': { x: 50, y: 30 },
-  'internal-api': { x: 50, y: 70 },
-  'db-main': { x: 80, y: 30 },
-  'cloud-storage': { x: 80, y: 70 },
+  'fw-1': { x: 15, y: 50 },
+  'web-cluster-1': { x: 35, y: 30 },
+  'internal-api': { x: 35, y: 70 },
+  'db-main': { x: 55, y: 30 },
+  'cloud-storage': { x: 55, y: 70 },
+  // Deception nodes grouped on the right side
+  'honey-api-proxy': { x: 75, y: 60 },
+  'honey-db-1': { x: 90, y: 80 },
 };
 
 export function NetworkTopology({ searchQuery = '' }: { searchQuery?: string }) {
@@ -31,22 +34,25 @@ export function NetworkTopology({ searchQuery = '' }: { searchQuery?: string }) 
 
   // Generate edges based on connections
   const edges = useMemo(() => {
-    const list: { source: string, target: string, id: string, hasThreat: boolean }[] = [];
+    const list: { source: string, target: string, id: string, hasThreat: boolean, isDeceptive: boolean }[] = [];
     nodes.forEach(node => {
       node.connections.forEach(targetId => {
         // Check if there is an active threat targeting this path (mock logic: if threat targets the targetNode)
+        const targetNode = networkNodes[targetId];
+        const isDeceptive = targetNode?.isHoneyNode || node.isHoneyNode || false;
         const hasThreat = activeThreats.some(t => t.targetNode === targetId || t.targetNode === node.id);
-        list.push({ source: node.id, target: targetId, id: `${node.id}-${targetId}`, hasThreat });
+        list.push({ source: node.id, target: targetId, id: `${node.id}-${targetId}`, hasThreat, isDeceptive });
       });
     });
     return list;
-  }, [nodes, activeThreats]);
+  }, [nodes, activeThreats, networkNodes]);
 
   const getNodeColor = (status: string) => {
     switch (status) {
       case 'compromised': return 'text-neon-red border-neon-red shadow-[0_0_15px_rgba(255,42,42,0.5)]';
       case 'warning': return 'text-yellow-400 border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.3)]';
       case 'isolated': return 'text-text-muted border-text-muted opacity-50';
+      case 'redirected': return 'text-neon-magenta border-neon-magenta shadow-[0_0_20px_rgba(255,0,255,0.6)] animate-pulse';
       default: return 'text-neon-cyan border-neon-cyan/50 hover:shadow-[0_0_15px_rgba(0,243,255,0.4)]';
     }
   };
@@ -104,10 +110,10 @@ export function NetworkTopology({ searchQuery = '' }: { searchQuery?: string }) 
                 y1={`${sourcePos.y}%`}
                 x2={`${targetPos.x}%`}
                 y2={`${targetPos.y}%`}
-                stroke={edge.hasThreat ? 'rgba(255, 42, 42, 0.8)' : 'rgba(0, 243, 255, 0.8)'}
-                strokeWidth={1.5}
-                strokeDasharray="4 12"
-                className="animate-[dash_2s_linear_infinite]"
+                stroke={edge.hasThreat ? 'rgba(255, 42, 42, 0.8)' : edge.isDeceptive ? 'rgba(255, 0, 255, 0.6)' : 'rgba(0, 243, 255, 0.8)'}
+                strokeWidth={edge.isDeceptive ? 2 : 1.5}
+                strokeDasharray={edge.isDeceptive ? "8 8" : "4 12"}
+                className={edge.isDeceptive ? "animate-[dash_1s_linear_infinite]" : "animate-[dash_2s_linear_infinite]"}
               />
           );
          })}
@@ -136,6 +142,9 @@ export function NetworkTopology({ searchQuery = '' }: { searchQuery?: string }) 
                   {node.status === 'compromised' && (
                     <div className="absolute inset-0 bg-neon-red/30 blur-xl rounded-full animate-pulse" />
                   )}
+                  {node.status === 'redirected' && (
+                    <div className="absolute inset-0 bg-neon-magenta/30 blur-xl rounded-full animate-pulse" />
+                  )}
                   {isMatched && (
                     <div className="absolute inset-0 bg-white/40 blur-md rounded-full animate-pulse" />
                   )}
@@ -143,14 +152,23 @@ export function NetworkTopology({ searchQuery = '' }: { searchQuery?: string }) 
                   <div className={cn(
                     "w-12 h-12 rounded-sm border bg-black/60 flex items-center justify-center relative backdrop-blur-sm transition-colors duration-300",
                     getNodeColor(node.status),
-                    isMatched && "border-white shadow-[0_0_15px_rgba(255,255,255,0.6)]"
+                    isMatched && "border-white shadow-[0_0_15px_rgba(255,255,255,0.6)]",
+                    node.isHoneyNode && "border-dashed border-2 opacity-80"
                   )}>
                     <Icon className="w-6 h-6 relative z-10" />
                 
                 {/* Node scanning line */}
-                <div className="absolute inset-0 overflow-hidden rounded-sm pointer-events-none">
-                   <div className="w-full h-[1px] bg-white/30 absolute top-0 animate-[scan-anim_2s_linear_infinite]" />
-                </div>
+                {!node.isHoneyNode && (
+                  <div className="absolute inset-0 overflow-hidden rounded-sm pointer-events-none">
+                     <div className="w-full h-[1px] bg-white/30 absolute top-0 animate-[scan-anim_2s_linear_infinite]" />
+                  </div>
+                )}
+                {/* Holographic effect for honey nodes */}
+                {node.isHoneyNode && (
+                  <div className="absolute inset-0 overflow-hidden rounded-sm pointer-events-none opacity-50 mix-blend-screen">
+                     <div className="w-full h-full bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,0,255,0.1)_2px,rgba(255,0,255,0.1)_4px)]" />
+                  </div>
+                )}
               </div>
               
               {/* Node Label */}
