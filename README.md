@@ -1,13 +1,13 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/shield-alert.svg" alt="ANTIGRAVITY Logo" width="120" height="120">
+  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/shield-alert.svg" alt="Aetheris Logo" width="120" height="120">
   <h1 align="center">AETHERIS</h1>
   <p align="center">
     <strong>Next-Generation Autonomous Multimodal AI Cyber Defense Platform</strong>
   </p>
   
   <p align="center">
-    <a href="https://github.com/yourusername/antigravity/actions"><img src="https://img.shields.io/github/actions/workflow/status/yourusername/antigravity/build.yml?style=for-the-badge&color=00f3ff&logo=github" alt="Build Status"></a>
-    <a href="https://github.com/yourusername/antigravity/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-00f3ff.svg?style=for-the-badge" alt="License"></a>
+    <a href="https://github.com/yourusername/aetheris/actions"><img src="https://img.shields.io/github/actions/workflow/status/yourusername/aetheris/build.yml?style=for-the-badge&color=00f3ff&logo=github" alt="Build Status"></a>
+    <a href="https://github.com/yourusername/aetheris/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-00f3ff.svg?style=for-the-badge" alt="License"></a>
     <img src="https://img.shields.io/badge/Architecture-Distributed-ff00ff.svg?style=for-the-badge" alt="Architecture">
     <img src="https://img.shields.io/badge/Status-V1_Active-ff2a2a.svg?style=for-the-badge" alt="Status">
   </p>
@@ -25,9 +25,9 @@
 
 ## ⚡ Vision Statement
 
-Modern cyber warfare operates at machine speed; human-in-the-loop Security Operations Centers (SOC) are fundamentally obsolete against automated zero-day campaigns. **ANTIGRAVITY** is designed to shift the paradigm from reactive monitoring to **deterministic, autonomous orchestration**.
+Modern cyber warfare operates at machine speed; human-in-the-loop Security Operations Centers (SOC) are fundamentally obsolete against automated zero-day campaigns. **Aetheris** is designed to shift the paradigm from reactive monitoring to **deterministic, autonomous orchestration**.
 
-Built with the engineering rigor of a DARPA initiative and the scalability of a venture-backed infrastructure platform, ANTIGRAVITY acts as the digital nervous system for enterprise security. It ingests multimodal telemetry across hybrid-cloud environments, correlates threat vectors using advanced AI agents (LangGraph/vLLM), and physically alters network topologies via Kubernetes and Cilium eBPF to neutralize threats—all in milliseconds.
+Built with the engineering rigor of a DARPA initiative and the scalability of a venture-backed infrastructure platform, Aetheris acts as the digital nervous system for enterprise security. It ingests multimodal telemetry across hybrid-cloud environments, correlates threat vectors using advanced AI agents (LangGraph/vLLM), and physically alters network topologies via Kubernetes and Cilium eBPF to neutralize threats—all in milliseconds.
 
 <br/>
 
@@ -45,7 +45,7 @@ Built with the engineering rigor of a DARPA initiative and the scalability of a 
 
 ## 🏗️ Architecture Overview
 
-ANTIGRAVITY utilizes a decoupled, distributed microservices architecture designed to process petabytes of telemetry without dropping packets.
+Aetheris utilizes a decoupled, distributed microservices architecture designed to process petabytes of telemetry without dropping packets.
 
 ### High-Level System Flow
 
@@ -144,7 +144,7 @@ graph TD
 
 ## 🧠 AI Reasoning Workflow
 
-ANTIGRAVITY does not rely on opaque LLM hallucination. It uses a **Deterministic StateGraph**.
+Aetheris does not rely on opaque LLM hallucination. It uses a **Deterministic StateGraph**.
 
 ```mermaid
 stateDiagram-v2
@@ -246,12 +246,12 @@ We operate like an elite engineering team. We welcome contributions from DevOps 
 
 ## ⚠️ Disclaimer & License
 
-**ANTIGRAVITY is an autonomous cyber warfare tool.** 
+**AETHERIS is an autonomous cyber warfare tool.** 
 This platform contains modules designed to isolate infrastructure and modify kernel-level network policies autonomously. It must **ONLY** be deployed in authorized enterprise environments or sandboxed cyber ranges. The maintainers assume no liability for infrastructural damage caused by autonomous misconfiguration.
 
 Distributed under the **MIT License**. See `LICENSE` for more information.
 
 ---
 <div align="center">
-  <sub>Built by Deepesh Kakkar | Advanced AI Cyber Defense</sub>
+  <sub>Built by Deepesh Kakkar</sub>
 </div>
