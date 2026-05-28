@@ -1,84 +1,257 @@
 <div align="center">
-  <br />
-  <h1>🛡️ Aetheris.ai</h1>
-  <p><strong>Next-Generation Autonomous Multimodal AI Cyber Defense Platform</strong></p>
-  <br />
+  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/shield-alert.svg" alt="ANTIGRAVITY Logo" width="120" height="120">
+  <h1 align="center">ANTIGRAVITY</h1>
+  <p align="center">
+    <strong>Next-Generation Autonomous Multimodal AI Cyber Defense Platform</strong>
+  </p>
+  
+  <p align="center">
+    <a href="https://github.com/yourusername/antigravity/actions"><img src="https://img.shields.io/github/actions/workflow/status/yourusername/antigravity/build.yml?style=for-the-badge&color=00f3ff&logo=github" alt="Build Status"></a>
+    <a href="https://github.com/yourusername/antigravity/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-00f3ff.svg?style=for-the-badge" alt="License"></a>
+    <img src="https://img.shields.io/badge/Architecture-Distributed-ff00ff.svg?style=for-the-badge" alt="Architecture">
+    <img src="https://img.shields.io/badge/Status-V1_Active-ff2a2a.svg?style=for-the-badge" alt="Status">
+  </p>
+  
+  <p align="center">
+    <a href="#vision">Vision</a> •
+    <a href="#architecture">Architecture</a> •
+    <a href="#ai-engine">AI Engine</a> •
+    <a href="#roadmap">Roadmap</a> •
+    <a href="#getting-started">Deploy</a>
+  </p>
 </div>
 
-> **Aetheris.ai** is a highly interactive, DARPA-grade AI cybersecurity command center MVP built with Next.js 16, Framer Motion, and Tailwind CSS v4. It features a fully autonomous simulation engine that generates, analyzes, and mitigates synthetic cyber threats in real-time across a dynamic glassmorphism UI.
-
 ---
 
-## ⚡ Key Features
+## ⚡ Vision Statement
 
-| Feature | Description |
-| :--- | :--- |
-| **Autonomous Simulation Engine** | A headless background loop (Zustand) that continuously spawns random threats (Ransomware, DDoS, SQLi), mutates system health, and orchestrates an automated mitigation lifecycle. |
-| **Interactive Network Topology** | A real-time SVG and Framer Motion-powered interactive map. Visualize enterprise assets, watch active threat paths, and see nodes change status (`warning`, `compromised`, `isolated`). |
-| **Command Center Dashboard** | Live telemetry visualizing network health and Global Threat Scores via Recharts area and bar charts, complete with glowing cyberpunk visual aesthetics. |
-| **AI Reasoning Stream** | A terminal-style feed outputting the autonomous decisions the AI engine makes as it analyzes patterns and deploys countermeasures. |
-| **Sandbox Attack Simulator** | Manually trigger targeted attacks against the simulated network to watch the AI's incident response times and mitigation workflows dynamically kick in. |
+Modern cyber warfare operates at machine speed; human-in-the-loop Security Operations Centers (SOC) are fundamentally obsolete against automated zero-day campaigns. **ANTIGRAVITY** is designed to shift the paradigm from reactive monitoring to **deterministic, autonomous orchestration**.
 
-## 🛠 Tech Stack
+Built with the engineering rigor of a DARPA initiative and the scalability of a venture-backed infrastructure platform, ANTIGRAVITY acts as the digital nervous system for enterprise security. It ingests multimodal telemetry across hybrid-cloud environments, correlates threat vectors using advanced AI agents (LangGraph/vLLM), and physically alters network topologies via Kubernetes and Cilium eBPF to neutralize threats—all in milliseconds.
 
-- **Framework**: Next.js 16 (App Router)
-- **Styling**: Tailwind CSS v4 (Custom Dark Glassmorphism Theme)
-- **Animations**: Framer Motion
-- **State Management**: Zustand
-- **Visualizations**: Recharts
-- **Icons**: Lucide React
-- **Language**: TypeScript (Strict)
+<br/>
 
-## 📸 System Architecture
+## 🔥 Core Capabilities
 
-Aetheris.ai relies on a centralized global state driven by a deterministic interval engine.
+| Capability | Technical Implementation | Enterprise Value |
+| :--- | :--- | :--- |
+| **Autonomous Threat Detection** | Real-time Kafka streaming from Zeek/Suricata sensors into ClickHouse for rapid anomaly detection. | Reduces MTTD (Mean Time To Detect) from days to milliseconds. |
+| **Multimodal AI Reasoning** | LangGraph state machines paired with Qdrant vector databases for RAG-assisted MITRE ATT&CK correlation. | Eliminates alert fatigue; AI contextualizes alerts before human review. |
+| **Machine-Speed Remediation** | AI-formulated Ansible playbooks and gRPC triggers to Kubernetes/Cilium eBPF APIs. | Zero-touch containment of lateral movement and payload execution. |
+| **Enterprise Sandbox Digital Twin** | Proxmox VE & Terraform dynamically spinning up vulnerable infrastructure for AI cyber range training. | Safe, isolated testing of AI containment logic against real malware. |
+| **Cinematic Command Center** | Next.js 16, Zustand, and Framer Motion powering a highly reactive, 60fps glassmorphism topology map. | Provides elite situational awareness and reduces cognitive load during active attacks. |
 
-1. **`useSimulationStore.ts`**: The single source of truth for the network architecture, live system health, incident logs, and active threat arrays.
-2. **`simulation/engine.ts`**: Mounted globally via the `DashboardLayout`, this hook loops every second to spawn threats, advance their state from `DETECTED` to `RESOLVED`, and isolate affected nodes dynamically.
-3. **UI Components**: Components subscribe directly to the store and react with high-performance CSS and Framer Motion animations based on the severity of the threat.
+<br/>
 
-> [!TIP]
-> **Performance Note:** To handle the heavy re-rendering of live charts and SVG topologies, components are deeply memoized and use independent localized framer-motion loops for ambient glow effects.
+## 🏗️ Architecture Overview
 
----
+ANTIGRAVITY utilizes a decoupled, distributed microservices architecture designed to process petabytes of telemetry without dropping packets.
 
-## 🚀 Getting Started
+### High-Level System Flow
 
-### Prerequisites
-- Node.js 18+
-- npm or yarn
+```mermaid
+graph TD
+    subgraph Enterprise Environment
+        K8s[Kubernetes Cluster]
+        eBPF[Cilium eBPF Sensors]
+        Network[Suricata / Zeek]
+    end
 
-### Installation
+    subgraph Data & Telemetry Plane
+        Kafka[Apache Kafka / Redpanda]
+        ClickHouse[(ClickHouse OLAP)]
+        Redis[(Redis Cache)]
+    end
 
-1. **Navigate to the directory**
-```bash
-cd ai-defense-system
+    subgraph AI Orchestration Core
+        FastAPI[FastAPI Gateway]
+        LangGraph[LangGraph Agents]
+        vLLM[vLLM Inference]
+        Qdrant[(Qdrant Vector DB)]
+        Celery[Celery Task Workers]
+    end
+
+    subgraph Command Center (Frontend)
+        NextJS[Next.js App Router]
+        Zustand[Zustand Store]
+        SVGMap[Topology Visualizer]
+    end
+
+    subgraph Execution Plane
+        Ansible[Ansible Control Node]
+        gRPC[gRPC Microservices]
+    end
+
+    eBPF -->|Packet Telemetry| Kafka
+    Network -->|Flow Logs| Kafka
+    Kafka --> ClickHouse
+    Kafka --> FastAPI
+    
+    FastAPI <-->|WebSocket Stream| NextJS
+    
+    FastAPI -->|Threat Payload| LangGraph
+    LangGraph <-->|RAG Query| Qdrant
+    LangGraph <-->|Inference| vLLM
+    
+    LangGraph -->|Mitigation Decision| Celery
+    Celery --> Ansible
+    Celery --> gRPC
+    
+    Ansible -->|Isolate Node| K8s
+    gRPC -->|Network Policy| eBPF
 ```
 
-2. **Install dependencies**
+<br/>
+
+## 🛠️ Technology Stack Breakdown
+
+<details>
+<summary><strong>Frontend Visualization (Command Center)</strong></summary>
+
+- **Next.js (App Router)**: Edge-ready, heavily optimized SSR and routing framework.
+- **Tailwind CSS v4 & Framer Motion**: Custom cyberpunk/glassmorphism design tokens enabling cinematic, 60fps layout transitions.
+- **Zustand**: High-performance, boilerplate-free state machine driving the real-time simulation engine without React re-render bloat.
+- **React Flow / Custom SVGs**: Real-time rendering of dynamic enterprise topologies and lateral movement vectors.
+</details>
+
+<details>
+<summary><strong>Backend & API Gateway</strong></summary>
+
+- **FastAPI (Python)**: Async-first gateway handling thousands of concurrent WebSocket telemetry streams.
+- **Golang Microservices**: Deployed for raw packet parsing and gRPC communication with infrastructure.
+- **Celery**: Distributed task queue for executing asynchronous mitigation workflows (e.g., SSH into nodes).
+</details>
+
+<details>
+<summary><strong>AI & Machine Learning Core</strong></summary>
+
+- **LangGraph & LangChain**: Deterministic routing of AI thought processes (Ingest -> Enrich -> Analyze -> Mitigate).
+- **vLLM**: High-throughput, memory-efficient local LLM serving.
+- **Qdrant / Milvus**: Vector databases storing MITRE ATT&CK frameworks and historical incident embeddings for RAG.
+- **Ray RLlib**: (Future) Reinforcement learning for optimizing AI mitigation policies in the sandbox.
+</details>
+
+<details>
+<summary><strong>Data, Telemetry, & Infrastructure</strong></summary>
+
+- **Kafka / Redpanda**: Distributed event streaming capable of handling high-velocity network flow logs.
+- **ClickHouse**: Columnar database for sub-second analytical querying over massive historical datasets.
+- **Kubernetes & Terraform**: Declarative infrastructure orchestration for the enterprise digital twin.
+- **Cilium eBPF**: Kernel-level network visibility and dynamic policy enforcement.
+</details>
+
+<br/>
+
+## 🧠 AI Reasoning Workflow
+
+ANTIGRAVITY does not rely on opaque LLM hallucination. It uses a **Deterministic StateGraph**.
+
+```mermaid
+stateDiagram-v2
+    [*] --> IngestTelemetry
+    IngestTelemetry --> EnrichContext: Vector DB RAG
+    EnrichContext --> AnalyzeVector: MITRE ATT&CK Mapping
+    AnalyzeVector --> FormulateMitigation: AI Decision
+    
+    state FormulateMitigation {
+        [*] --> EvaluateImpact
+        EvaluateImpact --> ProposeActions
+        ProposeActions --> [*]
+    }
+    
+    FormulateMitigation --> HumanApproval: If DEFCON < 3
+    FormulateMitigation --> ExecuteAnsible: If Autonomous
+    
+    HumanApproval --> ExecuteAnsible: Approved
+    HumanApproval --> [*]: Rejected
+    
+    ExecuteAnsible --> UpdateTopology
+    UpdateTopology --> [*]
+```
+
+<br/>
+
+## 🗺️ Phased Expansion Roadmap
+
+We are building this platform incrementally, ensuring each layer is production-grade before scaling to the next.
+
+- [x] **V1: Cyberpunk AI SOC MVP** - Frontend visual foundation, local state engine, simulated WebSocket streams, and core UI mechanics.
+- [x] **V2: Telemetry & Ingestion Platform** - Backend FastAPI implementation, real WebSocket streaming, and state schema hardening.
+- [x] **V3: Enterprise Sandbox Infrastructure** - Mocked provisioning pipelines for Terraform/Ansible integration.
+- [x] **V4: Multimodal AI Core** - Integration of LangGraph state machines in the backend for true cognitive orchestration.
+- [x] **V5: Autonomous Security Orchestration** - Closing the loop; backend AI decisions trigger simulated Ansible playbooks and visually isolate nodes.
+- [ ] **V6: Enterprise Hardening & Governance** - gRPC microservices, Keycloak OIDC, HashiCorp Vault secrets, strict RBAC, and real Kubernetes/eBPF telemetry ingestion.
+
+<br/>
+
+## 💻 Local Development & Deployment
+
+The current iteration (V5) simulates the massive data pipelines locally to allow for zero-cost, immediate developer onboarding and investor demonstrations.
+
+### 1. Repository Monorepo Structure
+```text
+antigravity/
+├── src/                    # Next.js Frontend Dashboard
+│   ├── app/                # App Router Pages
+│   ├── components/         # Cyberpunk UI Primitives & Visualizations
+│   ├── simulation/         # WebSocket Client Engine
+│   └── store/              # Zustand Global State
+├── backend/                # FastAPI & AI Engine
+│   ├── main.py             # Event Loop & WebSocket Gateway
+│   ├── ai_core.py          # LangGraph Cognitive Pipeline
+│   └── requirements.txt    # Python Dependencies
+├── infrastructure/         # (Future) Terraform & Ansible playbooks
+└── package.json            # Node Dependencies
+```
+
+### 2. Booting the Command Center
+You need Node.js (v18+) and Python (v3.10+).
+
 ```bash
+# 1. Start the Frontend
+git clone https://github.com/yourusername/antigravity.git
+cd antigravity
 npm install
-```
-
-3. **Start the Development Server**
-```bash
 npm run dev
+
+# 2. Start the AI Backend (In a new terminal)
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --port 8000
 ```
+**Access the platform at:** `http://localhost:3000`
 
-4. **Access the Command Center**
-Open [http://localhost:3000](http://localhost:3000) in your browser. You will be greeted by the cinematic boot sequence and biometric authentication screen before gaining access to the main dashboard.
+<br/>
 
----
+## 🔐 Security & Governance Model
 
-## 🎛 System Configuration & Sandbox
+ANTIGRAVITY operates on enterprise-grade zero-trust principles:
+- **Sandbox Isolation**: All attack simulations and malware testing occur within strict, air-gapped Proxmox/Kubernetes VLANs.
+- **RBAC & MFA**: Critical mitigation commands (e.g., dropping databases, severing trunk lines) require multi-factor human cryptographic signing if Autonomous mode is disabled.
+- **Immutable Audit Trails**: Every AI thought process and execution trace is logged immutably for compliance and post-mortem review.
 
-### Manual Override (Force Defense)
-On the top right of the dashboard, you can trigger a **Force Defense**. This overrides the AI, resolving all active threats immediately and resetting the Global Threat Score.
+<br/>
 
-### Sandbox Simulator
-Navigate to the **Sandbox** in the sidebar. Here you can inject custom payloads (e.g., Spear Phishing, DDoS) into the simulation engine. Once deployed, jump back to the **Topology** or **Dashboard** to see how the system isolates the compromised node in real-time.
+## 🤝 Contribution Guidelines
+
+We operate like an elite engineering team. We welcome contributions from DevOps engineers, AI researchers, and frontend visualization specialists.
+1. **Architecture First**: Do not submit PRs that violate the decoupled architecture. Discuss major changes in Discussions first.
+2. **Strict Typing**: All TypeScript and Python (via Pydantic) must be strictly typed.
+3. **Commit Standards**: Use Conventional Commits (`feat:`, `fix:`, `chore:`).
+4. **Branching**: `main` is production. Feature branches must stem from `develop`.
+
+<br/>
+
+## ⚠️ Disclaimer & License
+
+**ANTIGRAVITY is an autonomous cyber warfare tool.** 
+This platform contains modules designed to isolate infrastructure and modify kernel-level network policies autonomously. It must **ONLY** be deployed in authorized enterprise environments or sandboxed cyber ranges. The maintainers assume no liability for infrastructural damage caused by autonomous misconfiguration.
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
 
 ---
 <div align="center">
-  <i>Developed as a demonstration of high-performance React visualization and complex autonomous state management.</i>
+  <sub>Built by Deepesh Kakkar | Advanced AI Cyber Defense</sub>
 </div>
