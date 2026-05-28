@@ -71,7 +71,7 @@ graph TD
         Celery[Celery Task Workers]
     end
 
-    subgraph CommandCenter [Command Center (Frontend)]
+    subgraph CommandCenter ["Command Center (Frontend)"]
         NextJS[Next.js App Router]
         Zustand[Zustand Store]
         SVGMap[Topology Visualizer]
