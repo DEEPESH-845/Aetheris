@@ -252,6 +252,28 @@ This platform contains modules designed to isolate infrastructure and modify ker
 Distributed under the **MIT License**. See `LICENSE` for more information.
 
 ---
+
 <div align="center">
-  <sub>Built by Deepesh Kakkar</sub>
+  <br/>
+  <img src="assets/logo.svg" width="50" height="50" alt="Aetheris Mini Logo">
+  <h2>AETHERIS</h2>
+  <p><b>Defend at Machine Speed.</b></p>
+  
+  <p align="center">
+    <a href="#">
+      <img src="https://img.shields.io/badge/X-%23000000.svg?style=for-the-badge&logo=X&logoColor=white" alt="X">
+    </a>
+    <a href="#">
+      <img src="https://img.shields.io/badge/LinkedIn-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+    </a>
+    <a href="#">
+      <img src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+    </a>
+  </p>
+  
+  <br/>
+  <p>
+    <sub>Architected and Built by <b>Deepesh Kakkar</b>.</sub><br/>
+    <sub>&copy; 2026 Aetheris Defense Corp. All Rights Reserved.</sub>
+  </p>
 </div>
