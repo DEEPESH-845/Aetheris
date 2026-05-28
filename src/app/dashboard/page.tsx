@@ -74,7 +74,7 @@ export default function DashboardPage() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
         {/* Left Column: Network Map & Active Threats */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+        <div className="lg:col-span-2 flex flex-col gap-6 min-w-0 min-h-0">
           <CyberPanel className="flex-1 min-h-[300px] p-0 overflow-hidden" scanline glowColor="cyan">
             <div className="absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-gradient-to-b from-black/80 to-transparent z-20 pointer-events-none">
               <h2 className="text-sm font-mono text-neon-cyan uppercase">Network Topology Visualization</h2>
@@ -85,7 +85,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Right Column: Reasoning Stream & Threat List */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0 min-h-0">
           <CyberPanel className="flex-[2]" glowColor="none">
             <h2 className="text-sm font-mono text-white uppercase mb-4 border-b border-white/10 pb-2 flex items-center gap-2">
               <Activity className="w-4 h-4 text-neon-magenta" /> 

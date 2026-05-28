@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <!-- Glowing gradients -->
+    <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f3ff"/>
+      <stop offset="100%" stop-color="#ff00ff"/>
+    </linearGradient>
+    <linearGradient id="neonGradientReverse" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#00f3ff"/>
+      <stop offset="100%" stop-color="#ff00ff"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glowSmall" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="100%" height="100%" fill="transparent" />
+
+  <!-- Outer Orbit Rings -->
+  <circle cx="250" cy="250" r="210" fill="none" stroke="#00f3ff" stroke-width="1.5" stroke-dasharray="4 12" opacity="0.5">
+    <animateTransform attributeName="transform" type="rotate" from="0 250 250" to="360 250 250" dur="60s" repeatCount="indefinite" />
+  </circle>
+
+  <circle cx="250" cy="250" r="190" fill="none" stroke="#ff00ff" stroke-width="2" stroke-dasharray="40 20 5 20" opacity="0.6">
+    <animateTransform attributeName="transform" type="rotate" from="360 250 250" to="0 250 250" dur="40s" repeatCount="indefinite" />
+  </circle>
+
+  <circle cx="250" cy="250" r="170" fill="none" stroke="url(#neonGradient)" stroke-width="1" opacity="0.8">
+  </circle>
+
+  <!-- Central Hexagon Shield -->
+  <polygon points="250,90 388.56,170 388.56,330 250,410 111.44,330 111.44,170" fill="none" stroke="url(#neonGradient)" stroke-width="8" filter="url(#glow)" />
+  
+  <!-- Inner Hexagon -->
+  <polygon points="250,120 362.58,185 362.58,315 250,380 137.42,315 137.42,185" fill="none" stroke="#00f3ff" stroke-width="2" filter="url(#glowSmall)" opacity="0.8"/>
+  
+  <!-- Triangulation Matrix -->
+  <polygon points="250,160 327.94,205 327.94,295 250,340 172.06,295 172.06,205" fill="none" stroke="#ff00ff" stroke-width="1.5" opacity="0.6" />
+  <line x1="250" y1="160" x2="327.94" y2="295" stroke="#00f3ff" stroke-width="1" opacity="0.5" />
+  <line x1="327.94" y1="205" x2="172.06" y2="295" stroke="#00f3ff" stroke-width="1" opacity="0.5" />
+  <line x1="327.94" y1="295" x2="172.06" y2="205" stroke="#00f3ff" stroke-width="1" opacity="0.5" />
+  <line x1="250" y1="340" x2="172.06" y2="205" stroke="#00f3ff" stroke-width="1" opacity="0.5" />
+  
+  <!-- Intersection Nodes -->
+  <circle cx="250" cy="160" r="4" fill="#fff" filter="url(#glowSmall)"/>
+  <circle cx="327.94" cy="205" r="4" fill="#fff" filter="url(#glowSmall)"/>
+  <circle cx="327.94" cy="295" r="4" fill="#fff" filter="url(#glowSmall)"/>
+  <circle cx="250" cy="340" r="4" fill="#fff" filter="url(#glowSmall)"/>
+  <circle cx="172.06" cy="295" r="4" fill="#fff" filter="url(#glowSmall)"/>
+  <circle cx="172.06" cy="205" r="4" fill="#fff" filter="url(#glowSmall)"/>
+
+  <!-- Core AI Nucleus -->
+  <circle cx="250" cy="250" r="45" fill="url(#neonGradientReverse)" filter="url(#glow)">
+    <animate attributeName="r" values="40;50;40" dur="4s" repeatCount="indefinite" />
+  </circle>
+  
+  <circle cx="250" cy="250" r="25" fill="#000" opacity="0.5" />
+  <circle cx="250" cy="250" r="10" fill="#fff" filter="url(#glowSmall)">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- Connective Data Streams -->
+  <path d="M250,90 L250,120 M388.56,170 L362.58,185 M388.56,330 L362.58,315 M250,410 L250,380 M111.44,330 L137.42,315 M111.44,170 L137.42,185" stroke="url(#neonGradient)" stroke-width="4" filter="url(#glowSmall)"/>
+</svg>

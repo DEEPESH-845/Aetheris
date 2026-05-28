@@ -13,7 +13,7 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  title: "AI Defense System | Autonomous SOC",
+  title: "Aetheris | Autonomous SOC",
   description: "Next-generation DARPA-grade AI cyber defense platform.",
 };
 
