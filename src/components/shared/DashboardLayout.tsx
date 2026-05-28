@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Activity, Network, Target, Database, Settings, Menu, X, Cpu } from 'lucide-react';
+import { Shield, Activity, Network, Target, Database, Settings, Menu, X, Cpu, Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
@@ -15,7 +15,8 @@ const navItems = [
   { href: '/dashboard', label: 'Command Center', icon: Activity },
   { href: '/dashboard/monitoring', label: 'Threat Monitor', icon: Target },
   { href: '/dashboard/topology', label: 'Network Topology', icon: Network },
-  { href: '/dashboard/sandbox', label: 'Sandbox Lab', icon: Database },
+  { href: '/dashboard/orchestration', label: 'Orchestration', icon: Database },
+  { href: '/dashboard/sandbox', label: 'Sandbox Lab', icon: Terminal },
   { href: '/dashboard/settings', label: 'Configuration', icon: Settings },
 ];
 
