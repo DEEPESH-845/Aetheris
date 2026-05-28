@@ -6,8 +6,8 @@
   </p>
   
   <p align="center">
-    <a href="https://github.com/yourusername/aetheris/actions"><img src="https://img.shields.io/github/actions/workflow/status/yourusername/aetheris/build.yml?style=for-the-badge&color=00f3ff&logo=github" alt="Build Status"></a>
-    <a href="https://github.com/yourusername/aetheris/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-00f3ff.svg?style=for-the-badge" alt="License"></a>
+  </a>
+    <img src="https://img.shields.io/badge/License-MIT-00f3ff.svg?style=for-the-badge" alt="License"></a>
     <img src="https://img.shields.io/badge/Architecture-Distributed-ff00ff.svg?style=for-the-badge" alt="Architecture">
     <img src="https://img.shields.io/badge/Status-V1_Active-ff2a2a.svg?style=for-the-badge" alt="Status">
   </p>
