@@ -51,19 +51,19 @@ Aetheris utilizes a decoupled, distributed microservices architecture designed t
 
 ```mermaid
 graph TD
-    subgraph Enterprise Environment
+    subgraph EnterpriseEnvironment [Enterprise Environment]
         K8s[Kubernetes Cluster]
         eBPF[Cilium eBPF Sensors]
         Network[Suricata / Zeek]
     end
 
-    subgraph Data & Telemetry Plane
+    subgraph DataTelemetryPlane [Data & Telemetry Plane]
         Kafka[Apache Kafka / Redpanda]
         ClickHouse[(ClickHouse OLAP)]
         Redis[(Redis Cache)]
     end
 
-    subgraph AI Orchestration Core
+    subgraph AIOrchestrationCore [AI Orchestration Core]
         FastAPI[FastAPI Gateway]
         LangGraph[LangGraph Agents]
         vLLM[vLLM Inference]
@@ -71,13 +71,13 @@ graph TD
         Celery[Celery Task Workers]
     end
 
-    subgraph Command Center (Frontend)
+    subgraph CommandCenter [Command Center (Frontend)]
         NextJS[Next.js App Router]
         Zustand[Zustand Store]
         SVGMap[Topology Visualizer]
     end
 
-    subgraph Execution Plane
+    subgraph ExecutionPlane [Execution Plane]
         Ansible[Ansible Control Node]
         gRPC[gRPC Microservices]
     end
