@@ -258,13 +258,13 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
   <p><b>Defend at God Speed.</b></p>
   
   <p align="center">
-    <a href="#">
+    <a href="https://x.com/Deepesh_tsx">
       <img src="https://img.shields.io/badge/X-%23000000.svg?style=for-the-badge&logo=X&logoColor=white" alt="X">
     </a>
-    <a href="#">
+    <a href="https://www.linkedin.com/in/deepesh-kakkar/">
       <img src="https://img.shields.io/badge/LinkedIn-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
     </a>
-    <a href="#">
+    <a href="https://discord.com/users/1165716680610152488">
       <img src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
     </a>
   </p>
