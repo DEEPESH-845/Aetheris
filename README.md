@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <br />
+  <h1>🛡️ Aetheris.ai</h1>
+  <p><strong>Next-Generation Autonomous Multimodal AI Cyber Defense Platform</strong></p>
+  <br />
+</div>
 
-## Getting Started
+> **Aetheris.ai** is a highly interactive, DARPA-grade AI cybersecurity command center MVP built with Next.js 16, Framer Motion, and Tailwind CSS v4. It features a fully autonomous simulation engine that generates, analyzes, and mitigates synthetic cyber threats in real-time across a dynamic glassmorphism UI.
 
-First, run the development server:
+---
 
+## ⚡ Key Features
+
+| Feature | Description |
+| :--- | :--- |
+| **Autonomous Simulation Engine** | A headless background loop (Zustand) that continuously spawns random threats (Ransomware, DDoS, SQLi), mutates system health, and orchestrates an automated mitigation lifecycle. |
+| **Interactive Network Topology** | A real-time SVG and Framer Motion-powered interactive map. Visualize enterprise assets, watch active threat paths, and see nodes change status (`warning`, `compromised`, `isolated`). |
+| **Command Center Dashboard** | Live telemetry visualizing network health and Global Threat Scores via Recharts area and bar charts, complete with glowing cyberpunk visual aesthetics. |
+| **AI Reasoning Stream** | A terminal-style feed outputting the autonomous decisions the AI engine makes as it analyzes patterns and deploys countermeasures. |
+| **Sandbox Attack Simulator** | Manually trigger targeted attacks against the simulated network to watch the AI's incident response times and mitigation workflows dynamically kick in. |
+
+## 🛠 Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Styling**: Tailwind CSS v4 (Custom Dark Glassmorphism Theme)
+- **Animations**: Framer Motion
+- **State Management**: Zustand
+- **Visualizations**: Recharts
+- **Icons**: Lucide React
+- **Language**: TypeScript (Strict)
+
+## 📸 System Architecture
+
+Aetheris.ai relies on a centralized global state driven by a deterministic interval engine.
+
+1. **`useSimulationStore.ts`**: The single source of truth for the network architecture, live system health, incident logs, and active threat arrays.
+2. **`simulation/engine.ts`**: Mounted globally via the `DashboardLayout`, this hook loops every second to spawn threats, advance their state from `DETECTED` to `RESOLVED`, and isolate affected nodes dynamically.
+3. **UI Components**: Components subscribe directly to the store and react with high-performance CSS and Framer Motion animations based on the severity of the threat.
+
+> [!TIP]
+> **Performance Note:** To handle the heavy re-rendering of live charts and SVG topologies, components are deeply memoized and use independent localized framer-motion loops for ambient glow effects.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. **Navigate to the directory**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd ai-defense-system
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Start the Development Server**
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Access the Command Center**
+Open [http://localhost:3000](http://localhost:3000) in your browser. You will be greeted by the cinematic boot sequence and biometric authentication screen before gaining access to the main dashboard.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🎛 System Configuration & Sandbox
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Manual Override (Force Defense)
+On the top right of the dashboard, you can trigger a **Force Defense**. This overrides the AI, resolving all active threats immediately and resetting the Global Threat Score.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Sandbox Simulator
+Navigate to the **Sandbox** in the sidebar. Here you can inject custom payloads (e.g., Spear Phishing, DDoS) into the simulation engine. Once deployed, jump back to the **Topology** or **Dashboard** to see how the system isolates the compromised node in real-time.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+<div align="center">
+  <i>Developed as a demonstration of high-performance React visualization and complex autonomous state management.</i>
+</div>

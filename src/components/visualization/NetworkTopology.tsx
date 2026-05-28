@@ -23,10 +23,11 @@ const nodePositions: Record<string, { x: number, y: number }> = {
   'cloud-storage': { x: 80, y: 70 },
 };
 
-export function NetworkTopology() {
+export function NetworkTopology({ searchQuery = '' }: { searchQuery?: string }) {
   const { networkNodes, activeThreats } = useSimulationStore();
 
   const nodes = Object.values(networkNodes);
+  const searchLower = searchQuery.toLowerCase();
 
   // Generate edges based on connections
   const edges = useMemo(() => {
@@ -120,23 +121,31 @@ export function NetworkTopology() {
           
           const Icon = nodeIcons[node.type];
           
-          return (
-            <motion.div
-              key={node.id}
-              className="absolute pointer-events-auto cursor-pointer flex flex-col items-center justify-center transform -translate-x-1/2 -translate-y-1/2 group"
-              style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-              whileHover={{ scale: 1.1 }}
-            >
-              {/* Node glow effect based on status */}
-              {node.status === 'compromised' && (
-                <div className="absolute inset-0 bg-neon-red/30 blur-xl rounded-full animate-pulse" />
-              )}
+              const isMatched = searchLower && (node.id.toLowerCase().includes(searchLower) || node.label.toLowerCase().includes(searchLower));
               
-              <div className={cn(
-                "w-12 h-12 rounded-sm border bg-black/60 flex items-center justify-center relative backdrop-blur-sm transition-colors duration-300",
-                getNodeColor(node.status)
-              )}>
-                <Icon className="w-6 h-6 relative z-10" />
+              return (
+                <motion.div
+                  key={node.id}
+                  className="absolute pointer-events-auto cursor-pointer flex flex-col items-center justify-center transform -translate-x-1/2 -translate-y-1/2 group"
+                  style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+                  whileHover={{ scale: 1.1 }}
+                  animate={isMatched ? { scale: [1, 1.2, 1] } : {}}
+                  transition={{ repeat: isMatched ? Infinity : 0, duration: 1 }}
+                >
+                  {/* Node glow effect based on status */}
+                  {node.status === 'compromised' && (
+                    <div className="absolute inset-0 bg-neon-red/30 blur-xl rounded-full animate-pulse" />
+                  )}
+                  {isMatched && (
+                    <div className="absolute inset-0 bg-white/40 blur-md rounded-full animate-pulse" />
+                  )}
+                  
+                  <div className={cn(
+                    "w-12 h-12 rounded-sm border bg-black/60 flex items-center justify-center relative backdrop-blur-sm transition-colors duration-300",
+                    getNodeColor(node.status),
+                    isMatched && "border-white shadow-[0_0_15px_rgba(255,255,255,0.6)]"
+                  )}>
+                    <Icon className="w-6 h-6 relative z-10" />
                 
                 {/* Node scanning line */}
                 <div className="absolute inset-0 overflow-hidden rounded-sm pointer-events-none">

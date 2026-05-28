@@ -48,6 +48,8 @@ export default function ThreatMonitorPage() {
            <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
            <input 
              type="text" 
+             value={searchQuery}
+             onChange={(e) => setSearchQuery(e.target.value)}
              placeholder="Search incidents by IP, Node, or Type..." 
              className="w-full bg-black/40 border border-white/10 rounded-sm py-2 pl-9 pr-4 text-sm font-mono text-white focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all placeholder:text-white/20"
            />

@@ -8,6 +8,7 @@ import { useSimulationStore } from '@/store/useSimulationStore';
 
 export default function TopologyPage() {
   const { networkNodes } = useSimulationStore();
+  const [searchQuery, setSearchQuery] = React.useState('');
   
   const totalNodes = Object.keys(networkNodes).length;
   const compromisedNodes = Object.values(networkNodes).filter(n => n.status === 'compromised').length;
@@ -47,6 +48,8 @@ export default function TopologyPage() {
                  <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
                  <input 
                    type="text" 
+                   value={searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
                    placeholder="Search Nodes..." 
                    className="bg-black/60 border border-white/10 rounded-sm py-1.5 pl-9 pr-4 text-xs font-mono text-white focus:outline-none focus:border-neon-cyan/50"
                  />
@@ -61,7 +64,7 @@ export default function TopologyPage() {
               <span className="text-xs font-mono text-neon-cyan tracking-widest">SYNCED</span>
             </div>
          </div>
-         <NetworkTopology />
+         <NetworkTopology searchQuery={searchQuery} />
       </CyberPanel>
     </div>
   );
