@@ -190,7 +190,7 @@ The current iteration (V5) simulates the massive data pipelines locally to allow
 
 ### 1. Repository Monorepo Structure
 ```text
-antigravity/
+aetheris/
 ├── src/                    # Next.js Frontend Dashboard
 │   ├── app/                # App Router Pages
 │   ├── components/         # Cyberpunk UI Primitives & Visualizations
@@ -209,8 +209,8 @@ You need Node.js (v18+) and Python (v3.10+).
 
 ```bash
 # 1. Start the Frontend
-git clone https://github.com/yourusername/antigravity.git
-cd antigravity
+git clone https://github.com/yourusername/aetheris.git
+cd aetheris
 npm install
 npm run dev
 
@@ -227,7 +227,7 @@ uvicorn main:app --port 8000
 
 ## 🔐 Security & Governance Model
 
-ANTIGRAVITY operates on enterprise-grade zero-trust principles:
+Aetheris operates on enterprise-grade zero-trust principles:
 - **Sandbox Isolation**: All attack simulations and malware testing occur within strict, air-gapped Proxmox/Kubernetes VLANs.
 - **RBAC & MFA**: Critical mitigation commands (e.g., dropping databases, severing trunk lines) require multi-factor human cryptographic signing if Autonomous mode is disabled.
 - **Immutable Audit Trails**: Every AI thought process and execution trace is logged immutably for compliance and post-mortem review.
