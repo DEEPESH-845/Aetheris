@@ -3,6 +3,7 @@ import json
 import random
 import time
 import logging
+import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from ai_core import simulate_ai_reasoning
@@ -12,9 +13,14 @@ logger = logging.getLogger("aetheris.backend")
 
 app = FastAPI(title="Aetheris Backend", version="3.0")
 
+frontend_url = os.getenv("FRONTEND_URL")
+allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -201,6 +207,10 @@ async def simulate_ebpf_telemetry(websocket: WebSocket, environment_id: str):
                 "timestamp": int(time.time() * 1000)
             }
         }, websocket)
+
+@app.get("/")
+async def root():
+    return {"message": "Aetheris Backend is online and active.", "status": "healthy"}
 
 @app.on_event("startup")
 async def startup_event():
