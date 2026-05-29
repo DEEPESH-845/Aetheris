@@ -72,7 +72,7 @@ export function SiteHeader() {
               </CyberButton>
             </Link>
             <div className="ml-2 mt-1">
-              <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-10 h-10 border border-neon-cyan/30 rounded-xl" } }} />
+              <UserButton appearance={{ elements: { avatarBox: "w-10 h-10 border border-neon-cyan/30 rounded-xl" } }} />
             </div>
           </Show>
         </div>

@@ -144,7 +144,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </CyberButton>
             <div className="ml-2">
               <UserButton 
-                afterSignOutUrl="/" 
                 appearance={{ 
                   elements: { 
                     avatarBox: "w-9 h-9 border border-neon-cyan/50 rounded-xl" 
