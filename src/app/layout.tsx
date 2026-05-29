@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Fira_Code } from "next/font/google";
+import { ClerkProvider } from '@clerk/nextjs'
+import { dark } from '@clerk/themes'
 import "./globals.css";
 
 const outfit = Outfit({
@@ -23,13 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${outfit.variable} ${firaCode.variable} h-full antialiased dark`}
-    >
-      <body className="min-h-full flex flex-col bg-cyber-darker text-text-primary selection:bg-neon-cyan/30 selection:text-white">
-        {children}
-      </body>
-    </html>
+    <ClerkProvider appearance={{ baseTheme: dark }}>
+      <html
+        lang="en"
+        className={`${outfit.variable} ${firaCode.variable} h-full antialiased dark`}
+      >
+        <body className="min-h-full flex flex-col bg-cyber-darker text-text-primary selection:bg-neon-cyan/30 selection:text-white">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Terminal, Lock, Unlock, Fingerprint, Loader2 } from 'lucide-react';
 import { CyberButton } from '@/components/core/CyberButton';
-import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { Show, SignInButton } from '@clerk/nextjs';
 
 const bootSequence = [
   "INITIALIZING NEURAL KERNEL...",
@@ -135,7 +135,7 @@ export function TerminalBoot() {
                     <h2 className="text-xl font-outfit font-light text-white tracking-widest mb-2">SYSTEM LOCKED</h2>
                     <p className="text-xs text-text-muted uppercase tracking-widest">Biometric verification required</p>
                   </div>
-                  <SignedIn>
+                  <Show when="signed-in">
                     <CyberButton 
                       onClick={handleAuth} 
                       variant="primary" 
@@ -146,8 +146,8 @@ export function TerminalBoot() {
                         ENTER SOC
                       </span>
                     </CyberButton>
-                  </SignedIn>
-                  <SignedOut>
+                  </Show>
+                  <Show when="signed-out">
                     <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                       <CyberButton 
                         variant="primary" 
@@ -159,7 +159,7 @@ export function TerminalBoot() {
                         </span>
                       </CyberButton>
                     </SignInButton>
-                  </SignedOut>
+                  </Show>
                 </motion.div>
               ) : (
                 <motion.div 
