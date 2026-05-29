@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Terminal, Lock, Unlock, Fingerprint, Loader2 } from 'lucide-react';
 import { CyberButton } from '@/components/core/CyberButton';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 
 const bootSequence = [
   "INITIALIZING NEURAL KERNEL...",
@@ -134,16 +135,31 @@ export function TerminalBoot() {
                     <h2 className="text-xl font-outfit font-light text-white tracking-widest mb-2">SYSTEM LOCKED</h2>
                     <p className="text-xs text-text-muted uppercase tracking-widest">Biometric verification required</p>
                   </div>
-                  <CyberButton 
-                    onClick={handleAuth} 
-                    variant="primary" 
-                    className="w-[240px] h-12 shadow-[0_0_20px_rgba(0,243,255,0.15)] group"
-                  >
-                    <span className="flex items-center justify-center gap-3">
-                      <Fingerprint className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      AUTHENTICATE
-                    </span>
-                  </CyberButton>
+                  <SignedIn>
+                    <CyberButton 
+                      onClick={handleAuth} 
+                      variant="primary" 
+                      className="w-[240px] h-12 shadow-[0_0_20px_rgba(0,243,255,0.15)] group"
+                    >
+                      <span className="flex items-center justify-center gap-3">
+                        <Fingerprint className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        ENTER SOC
+                      </span>
+                    </CyberButton>
+                  </SignedIn>
+                  <SignedOut>
+                    <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                      <CyberButton 
+                        variant="primary" 
+                        className="w-[240px] h-12 shadow-[0_0_20px_rgba(0,243,255,0.15)] group"
+                      >
+                        <span className="flex items-center justify-center gap-3">
+                          <Fingerprint className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                          AUTHENTICATE
+                        </span>
+                      </CyberButton>
+                    </SignInButton>
+                  </SignedOut>
                 </motion.div>
               ) : (
                 <motion.div 

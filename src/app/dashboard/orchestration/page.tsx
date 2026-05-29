@@ -150,14 +150,67 @@ function TerraformTerminal({ twin }: { twin: SandboxTwin }) {
 
 // ─── Main Orchestration Page ──────────────────────────────────────────────────
 export default function OrchestrationPage() {
-  const { sandboxEnvironments, sandboxTwins, initSandboxEnvironment } = useSimulationStore();
+  const { sandboxEnvironments, sandboxTwins, initSandboxEnvironment, spawnSandboxTwin, addTerraformOp, updateTwinLifecycle } = useSimulationStore();
   const twins = Object.values(sandboxTwins);
   const activeTwin = twins.find(t => ['COMBAT', 'ONLINE', 'HARDENING', 'PROVISIONING', 'CLONING'].includes(t.lifecycle));
 
   const handleProvision = () => {
-    const envId = `ENV-${Math.floor(Math.random() * 9000) + 1000}`;
+    const twinId = `TWIN-${Math.floor(Math.random() * 9000) + 1000}`;
+    const envId = `ENV-${twinId}`;
     initSandboxEnvironment(envId);
-    if (sendToBackend) sendToBackend({ type: 'PROVISION_SANDBOX', envId });
+
+    const newTwin: SandboxTwin = {
+      id: twinId,
+      threatId: `SIM-${Math.floor(Math.random() * 90000) + 10000}`,
+      attackerIp: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.12.5`,
+      lifecycle: 'PROVISIONING',
+      vmName: `honey-prod-${twinId.toLowerCase()}`,
+      vmNode: 'pve-02',
+      vCpus: 4,
+      ramGb: 16,
+      diskGb: 50,
+      ipAddress: '10.0.9.155',
+      spawnedAt: Date.now(),
+      terraformOps: [],
+      attackerSessions: [],
+      exfilAttempts: 0,
+      credentialHits: 0,
+      iocsCaptured: [],
+    };
+
+    spawnSandboxTwin(newTwin);
+
+    // Simulate provisioning workflow
+    setTimeout(() => {
+      addTerraformOp(twinId, {
+        id: `op-1-${Date.now()}`,
+        ts: Date.now(),
+        step: 'proxmox_vm_qemu.honey-db: Creating...',
+        status: 'running'
+      });
+      
+      setTimeout(() => {
+        addTerraformOp(twinId, {
+          id: `op-2-${Date.now()}`,
+          ts: Date.now(),
+          step: 'proxmox_vm_qemu.honey-db: Creation complete',
+          status: 'complete',
+          duration: 1200
+        });
+        updateTwinLifecycle(twinId, 'HARDENING');
+        
+        setTimeout(() => {
+           addTerraformOp(twinId, {
+             id: `op-3-${Date.now()}`,
+             ts: Date.now(),
+             step: 'ansible_playbook.harden_nginx: TASK [Apply Zero Trust config]',
+             status: 'complete'
+           });
+           updateTwinLifecycle(twinId, 'ONLINE');
+        }, 1500);
+
+      }, 2000);
+    }, 500);
   };
 
   return (
@@ -269,7 +322,7 @@ export default function OrchestrationPage() {
         <CyberPanel className="flex-1 flex flex-col items-center justify-center border-dashed border-white/10 text-center p-8 bg-black/20 backdrop-blur-xl">
           <Database className="w-16 h-16 text-white/5 mb-6" />
           <h2 className="text-2xl font-outfit font-bold text-text-muted uppercase tracking-widest mb-3">No Active Sandbox Twins</h2>
-          <p className="text-text-secondary text-sm font-mono max-w-lg leading-relaxed">
+          <p className="text-text-secondary text-sm font-mono max-w-lg leading-relaxed mx-auto text-center">
             Sandbox twins are provisioned automatically when a threat enters the MITIGATING phase.
             Trigger an attack in the Sandbox Lab or wait for the simulation engine to detect a threat.
           </p>
