@@ -8,16 +8,24 @@ import { NetworkTrafficChart } from "@/components/visualization/NetworkTrafficCh
 import { ActiveThreatsList } from "@/components/dashboard/ActiveThreatsList";
 import { AIReasoningStream } from "@/components/dashboard/AIReasoningStream";
 import { NetworkTopology } from "@/components/visualization/NetworkTopology";
+import { TelemetryPacketFeed } from "@/components/dashboard/TelemetryPacketFeed";
+import { PipelineStatusBar } from "@/components/dashboard/PipelineStatusBar";
 
 export default function DashboardPage() {
   const { globalThreatScore, activeThreats, systemHealth } = useSimulationStore();
 
   return (
-    <div className="space-y-6 h-full flex flex-col">
+    <div className="space-y-4 h-full flex flex-col">
+      {/* Dashboard Header */}
       <header className="flex-shrink-0">
         <h1 className="text-3xl font-outfit font-bold text-white mb-1 tracking-wide">COMMAND CENTER</h1>
-        <p className="text-text-secondary font-mono text-xs uppercase tracking-widest">Autonomous Multimodal AI Defense System // Live Telemetry</p>
+        <p className="text-text-secondary font-mono text-xs uppercase tracking-widest">Autonomous Deception Warfare System // Active Battlefield</p>
       </header>
+
+      {/* Phase 3: Live Pipeline Status Bar */}
+      <div className="flex-shrink-0">
+        <PipelineStatusBar />
+      </div>
 
       {/* Top Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
@@ -71,21 +79,28 @@ export default function DashboardPage() {
         </CyberPanel>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
-        {/* Left Column: Network Map & Active Threats */}
-        <div className="lg:col-span-2 flex flex-col gap-6 min-w-0 min-h-0">
-          <CyberPanel className="flex-1 min-h-[300px] p-0 overflow-hidden" scanline glowColor="cyan">
+      {/* Main Content Grid — 3 columns */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
+
+        {/* Col 1–2: Topology + Telemetry Feed */}
+        <div className="lg:col-span-2 flex flex-col gap-4 min-w-0 min-h-0">
+          {/* Network Topology */}
+          <CyberPanel className="flex-1 min-h-[260px] p-0 overflow-hidden" scanline glowColor="cyan">
             <div className="absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-gradient-to-b from-black/80 to-transparent z-20 pointer-events-none">
-              <h2 className="text-sm font-mono text-neon-cyan uppercase">Network Topology Visualization</h2>
+              <h2 className="text-sm font-mono text-neon-cyan uppercase">Network Topology // Deception Map</h2>
               <span className="text-[10px] font-mono text-neon-cyan/70 bg-neon-cyan/10 px-2 py-1 rounded-sm border border-neon-cyan/30">LIVE FEED</span>
             </div>
             <NetworkTopology />
           </CyberPanel>
+
+          {/* Phase 3: Telemetry Packet Feed */}
+          <CyberPanel className="h-[200px] p-0 overflow-hidden" glowColor="none">
+            <TelemetryPacketFeed />
+          </CyberPanel>
         </div>
 
-        {/* Right Column: Reasoning Stream & Threat List */}
-        <div className="flex flex-col gap-6 min-w-0 min-h-0">
+        {/* Col 3: Threats + AI Stream */}
+        <div className="flex flex-col gap-4 min-w-0 min-h-0">
           <CyberPanel className="flex-[2]" glowColor="none">
             <h2 className="text-sm font-mono text-white uppercase mb-4 border-b border-white/10 pb-2 flex items-center gap-2">
               <Activity className="w-4 h-4 text-neon-magenta" /> 
