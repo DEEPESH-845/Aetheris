@@ -13,25 +13,26 @@
   </p>
   
   <p align="center">
-    <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
-    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-    <img src="https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
-    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
-    <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-    <img src="https://img.shields.io/badge/Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white" alt="Kafka" />
+    <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&amp;logo=nextdotjs&amp;logoColor=white" alt="Next.js" />
+    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&amp;logo=react&amp;logoColor=61DAFB" alt="React" />
+    <img src="https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&amp;logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/Python-3670A0?style=for-the-badge&amp;logo=python&amp;logoColor=ffdd54" alt="Python" />
+    <img src="https://img.shields.io/badge/Kafka-231F20?style=for-the-badge&amp;logo=apachekafka&amp;logoColor=white" alt="Kafka" />
   </p>
   
   <p align="center">
-    <a href="#-the-problem">The Problem</a> •
-    <a href="#-the-solution">The Solution</a> •
-    <a href="#-core-architecture">Architecture</a> •
-    <a href="#-ai-cognitive-loop">AI Engine</a> •
-    <a href="#-getting-started">Deploy</a>
+    <a href="#the-problem">The Problem</a> •
+    <a href="#the-solution">The Solution</a> •
+    <a href="#core-architecture">Architecture</a> •
+    <a href="#ai-cognitive-loop">AI Engine</a> •
+    <a href="#getting-started">Deploy</a>
   </p>
 </div>
 
 ---
 
+<a id="the-problem"></a>
 ## 🛑 The Problem: Reactive Security is Obsolete
 
 Modern cyber warfare operates at machine speed. By the time a human-in-the-loop Security Operations Center (SOC) receives an alert, triages the telemetry, and formulates a response, the adversary has already achieved lateral movement and data exfiltration.
@@ -40,6 +41,7 @@ Modern cyber warfare operates at machine speed. By the time a human-in-the-loop 
 - **Static Defenses**: Traditional honeypots are static, easily fingerprintable, and ignored by sophisticated APTs (Advanced Persistent Threats).
 - **Delayed Mitigation**: Manual incident response playbooks cannot compete with automated, polymorphic zero-day campaigns.
 
+<a id="the-solution"></a>
 ## ⚡ The Solution: AETHERIS
 
 AETHERIS shifts the paradigm from **reactive monitoring** to **deterministic, autonomous orchestration and deception**.
@@ -62,6 +64,7 @@ The attacker believes they are successfully exploiting the production network, w
 
 <br/>
 
+<a id="core-architecture"></a>
 ## 🏗️ Core Architecture
 
 Aetheris utilizes a decoupled, distributed microservices architecture designed to process petabytes of telemetry without dropping packets, instantly routing threats to sandboxed environments.
@@ -124,6 +127,7 @@ graph TD
 
 <br/>
 
+<a id="ai-cognitive-loop"></a>
 ## 🧠 AI Cognitive Loop
 
 Aetheris does not rely on opaque LLM hallucination. It uses a **Deterministic StateGraph** to map out its thought processes, ensuring enterprise governance and predictable mitigation.
@@ -164,16 +168,17 @@ Aetheris is engineered using a modern, decoupled microservices architecture desi
 
 | Layer | Primary Technologies | Architecture Role & Value |
 | :--- | :--- | :--- |
-| **🌐 Command Center (Frontend)** | <img src="https://img.shields.io/badge/Next.js-000?logo=next.js&style=flat-square" alt="Next.js"/> <img src="https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB&style=flat-square" alt="React 19"/> <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white&style=flat-square" alt="Tailwind"/> <img src="https://img.shields.io/badge/Zustand-4A4A55?style=flat-square" alt="Zustand"/> | Next.js 16 (App Router) combined with Framer Motion provides a highly optimized, 60fps cinematic glassmorphism UI. Delivers elite, real-time God-level situational awareness during active threat engagements. |
-| **⚡ API Gateway & Backend** | <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white&style=flat-square" alt="FastAPI"/> <img src="https://img.shields.io/badge/Python_3.11-3776AB?logo=python&logoColor=white&style=flat-square" alt="Python"/> <img src="https://img.shields.io/badge/WebSockets-010101?logo=socket.io&logoColor=white&style=flat-square" alt="WebSockets"/> <img src="https://img.shields.io/badge/Clerk_Auth-6C47FF?logo=clerk&logoColor=white&style=flat-square" alt="Clerk"/> | Asynchronous Python engine handling thousands of concurrent WebSocket telemetry streams and serving as the primary bridge between the data plane and the frontend orchestration layer. |
+| **🌐 Command Center (Frontend)** | <img src="https://img.shields.io/badge/Next.js-000?logo=next.js&amp;style=flat-square" alt="Next.js"/> <img src="https://img.shields.io/badge/React_19-20232A?logo=react&amp;logoColor=61DAFB&amp;style=flat-square" alt="React 19"/> <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&amp;logoColor=white&amp;style=flat-square" alt="Tailwind"/> <img src="https://img.shields.io/badge/Zustand-4A4A55?style=flat-square" alt="Zustand"/> | Next.js 16 (App Router) combined with Framer Motion provides a highly optimized, 60fps cinematic glassmorphism UI. Delivers elite, real-time God-level situational awareness during active threat engagements. |
+| **⚡ API Gateway & Backend** | <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&amp;logoColor=white&amp;style=flat-square" alt="FastAPI"/> <img src="https://img.shields.io/badge/Python_3.11-3670A0?logo=python&amp;logoColor=ffdd54&amp;style=flat-square" alt="Python"/> <img src="https://img.shields.io/badge/WebSockets-010101?logo=socket.io&amp;logoColor=white&amp;style=flat-square" alt="WebSockets"/> <img src="https://img.shields.io/badge/Clerk_Auth-6C47FF?logo=clerk&amp;logoColor=white&amp;style=flat-square" alt="Clerk"/> | Asynchronous Python engine handling thousands of concurrent WebSocket telemetry streams and serving as the primary bridge between the data plane and the frontend orchestration layer. |
 | **🧠 AI & Machine Learning Core** | <img src="https://img.shields.io/badge/LangGraph-000000?style=flat-square" alt="LangGraph"/> <img src="https://img.shields.io/badge/LangChain-121212?style=flat-square" alt="LangChain"/> <img src="https://img.shields.io/badge/vLLM-005571?style=flat-square" alt="vLLM"/> <img src="https://img.shields.io/badge/Qdrant-EF4D5D?style=flat-square" alt="Qdrant"/> | LangGraph orchestrates deterministic state machine routing, replacing opaque LLM hallucination with predictable, enterprise-grade AI reasoning and mitigation decision trees. |
-| **📊 Data & Telemetry Plane** | <img src="https://img.shields.io/badge/Apache_Kafka-231F20?logo=apachekafka&logoColor=white&style=flat-square" alt="Kafka"/> <img src="https://img.shields.io/badge/ClickHouse-FFCC01?logo=clickhouse&logoColor=black&style=flat-square" alt="ClickHouse"/> | Distributed event streaming (Kafka) paired with sub-second analytical querying (ClickHouse) ensures petabytes of telemetry are processed without dropping critical intrusion packets. |
-| **☁️ Infrastructure & DevOps** | <img src="https://img.shields.io/badge/Railway-0B0D0E?logo=railway&logoColor=white&style=flat-square" alt="Railway"/> <img src="https://img.shields.io/badge/Vercel-000?logo=vercel&style=flat-square" alt="Vercel"/> <img src="https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white&style=flat-square" alt="Kubernetes"/> <img src="https://img.shields.io/badge/Terraform-7B42BC?logo=terraform&logoColor=white&style=flat-square" alt="Terraform"/> | Declarative infrastructure seamlessly deployed across edge (Vercel) and scalable cloud environments (Railway), orchestrated by Proxmox VE and Cilium eBPF for kernel-level interception. |
+| **📊 Data & Telemetry Plane** | <img src="https://img.shields.io/badge/Apache_Kafka-231F20?logo=apachekafka&amp;logoColor=white&amp;style=flat-square" alt="Kafka"/> <img src="https://img.shields.io/badge/ClickHouse-FFCC01?logo=clickhouse&amp;logoColor=black&amp;style=flat-square" alt="ClickHouse"/> | Distributed event streaming (Kafka) paired with sub-second analytical querying (ClickHouse) ensures petabytes of telemetry are processed without dropping critical intrusion packets. |
+| **☁️ Infrastructure & DevOps** | <img src="https://img.shields.io/badge/Railway-0B0D0E?logo=railway&amp;logoColor=white&amp;style=flat-square" alt="Railway"/> <img src="https://img.shields.io/badge/Vercel-000?logo=vercel&amp;style=flat-square" alt="Vercel"/> <img src="https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&amp;logoColor=white&amp;style=flat-square" alt="Kubernetes"/> <img src="https://img.shields.io/badge/Terraform-7B42BC?logo=terraform&amp;logoColor=white&amp;style=flat-square" alt="Terraform"/> | Declarative infrastructure seamlessly deployed across edge (Vercel) and scalable cloud environments (Railway), orchestrated by Proxmox VE and Cilium eBPF for kernel-level interception. |
 
 </div>
 
 <br/>
 
+<a id="getting-started"></a>
 ## 🚀 Getting Started
 
 The current iteration simulates the massive data pipelines locally to allow for zero-cost, immediate developer onboarding and investor demonstrations.
