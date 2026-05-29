@@ -10,6 +10,7 @@ import { useSimulationStore } from '@/store/useSimulationStore';
 import { useSimulationEngine } from '@/simulation/engine';
 import { CyberButton } from '../core/CyberButton';
 import { StatusBadge } from '../core/StatusBadge';
+import { UserButton } from '@clerk/nextjs';
 
 const navItems = [
   { href: '/dashboard',              label: 'Command Center',  icon: Activity },
@@ -141,9 +142,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <CyberButton onClick={handleForceDefense} variant="outline" size="sm" icon={<Shield className="w-3 h-3" />}>
               Force Defense
             </CyberButton>
-            <div className="w-8 h-8 rounded-full border border-neon-cyan/50 bg-neon-cyan/10 flex items-center justify-center relative">
-              <span className="text-neon-cyan font-mono text-xs">OP</span>
-              <span className="absolute top-0 right-0 w-2 h-2 bg-neon-green rounded-full border border-cyber-darker" />
+            <div className="ml-2">
+              <UserButton 
+                afterSignOutUrl="/" 
+                appearance={{ 
+                  elements: { 
+                    avatarBox: "w-9 h-9 border border-neon-cyan/50 rounded-xl" 
+                  } 
+                }} 
+              />
             </div>
           </div>
         </header>

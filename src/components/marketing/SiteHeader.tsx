@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Shield } from 'lucide-react';
 import { CyberButton } from '@/components/core/CyberButton';
+import { Show, SignInButton, UserButton } from '@clerk/nextjs';
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -51,16 +52,29 @@ export function SiteHeader() {
         </nav>
         
         <div className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <CyberButton variant="ghost" className="hidden md:flex hover:text-white">
-              Sign In
-            </CyberButton>
-          </Link>
-          <Link href="/dashboard">
-            <CyberButton variant="primary">
-              Launch SOC
-            </CyberButton>
-          </Link>
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <CyberButton variant="ghost" className="hidden md:flex hover:text-white">
+                Sign In
+              </CyberButton>
+            </SignInButton>
+            <SignInButton mode="modal">
+              <CyberButton variant="primary">
+                Launch SOC
+              </CyberButton>
+            </SignInButton>
+          </Show>
+          
+          <Show when="signed-in">
+            <Link href="/dashboard">
+              <CyberButton variant="primary" className="hidden md:flex">
+                Dashboard
+              </CyberButton>
+            </Link>
+            <div className="ml-2 mt-1">
+              <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-10 h-10 border border-neon-cyan/30 rounded-xl" } }} />
+            </div>
+          </Show>
         </div>
       </div>
     </header>
