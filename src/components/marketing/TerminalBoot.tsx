@@ -15,7 +15,7 @@ const bootSequence = [
   "SYSTEM ONLINE. AWAITING AUTHORIZATION."
 ];
 
-const springTransition = { type: "spring", bounce: 0, duration: 0.8 };
+const springTransition: any = { type: "spring", bounce: 0, duration: 0.8 };
 
 export function TerminalBoot() {
   const router = useRouter();
@@ -169,14 +169,38 @@ export function TerminalBoot() {
                     <motion.div 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex flex-col items-center gap-6"
+                      className="flex flex-col items-center gap-6 w-full"
                     >
-                      <div className="relative">
-                        <div className="w-16 h-16 rounded-full border-t-2 border-r-2 border-neon-cyan animate-spin" />
-                        <div className="w-12 h-12 rounded-full border-b-2 border-l-2 border-neon-magenta animate-[spin_2s_reverse_infinite] absolute top-2 left-2" />
-                        <Fingerprint className="w-6 h-6 text-white/50 absolute top-5 left-5 opacity-50 pulse" />
+                      <div className="relative flex items-center justify-center">
+                         <div className="absolute inset-0 bg-neon-cyan/20 blur-[40px] rounded-full animate-pulse" />
+                         <svg className="w-24 h-24 animate-[spin_10s_linear_infinite] relative z-10" viewBox="0 0 100 100">
+                           <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(0,243,255,0.2)" strokeWidth="1" strokeDasharray="4 4" />
+                           <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,0,85,0.3)" strokeWidth="1" strokeDasharray="10 5" className="animate-[spin_4s_reverse_infinite]" style={{ transformOrigin: 'center' }} />
+                           <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(0,243,255,0.5)" strokeWidth="2" strokeDasharray="20 10 5 10" className="animate-[spin_3s_linear_infinite]" style={{ transformOrigin: 'center' }} />
+                         </svg>
+                         <div className="absolute font-mono text-[10px] text-neon-cyan/80 tracking-widest text-center leading-tight z-20">
+                           <div className="animate-pulse">DECRYPTING</div>
+                           <div className="text-white">KEY_X9</div>
+                         </div>
                       </div>
-                      <p className="text-white/60 text-xs font-mono tracking-[0.2em] animate-pulse">VERIFYING NEURAL SIGNATURE...</p>
+                      <div className="w-full max-w-[240px] space-y-2">
+                        <div className="flex justify-between text-[9px] font-mono text-neon-cyan">
+                           <span>HANDSHAKE_INIT</span>
+                           <span className="animate-pulse">100%</span>
+                        </div>
+                        <div className="h-0.5 w-full bg-white/10 rounded-full overflow-hidden relative">
+                           <div className="absolute inset-0 bg-neon-cyan/20 blur-sm" />
+                           <motion.div 
+                             initial={{ width: "0%" }}
+                             animate={{ width: "100%" }}
+                             transition={{ duration: 1.5, ease: "easeInOut" }}
+                             className="h-full bg-neon-cyan relative z-10"
+                           />
+                        </div>
+                        <div className="text-white/40 text-[9px] font-mono tracking-[0.2em] animate-pulse text-center pt-2">
+                          ESTABLISHING NEURAL LINK...
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </motion.div>

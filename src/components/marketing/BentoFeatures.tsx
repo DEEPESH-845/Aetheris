@@ -13,7 +13,7 @@ export function BentoFeatures() {
           Orchestrate <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">Defenses</span>
         </h2>
         <p className="text-text-secondary max-w-2xl text-lg">
-          Unlike reactive monitoring tools, Aetheris closes the loop. It detects, reasons, and contains zero-day lateral movement autonomously.
+          Unlike reactive monitoring tools, Aetheris dynamically generates adaptive deception environments to trap, study, and neutralize attackers autonomously.
         </p>
       </div>
 
@@ -34,10 +34,9 @@ export function BentoFeatures() {
           </div>
           
           <div className="relative z-10">
-            <h3 className="text-2xl font-outfit font-medium text-white mb-3">Real-time Telemetry Ingestion</h3>
+            <h3 className="text-2xl font-outfit font-medium text-white mb-3">Dynamic Deception Generation</h3>
             <p className="text-text-secondary leading-relaxed max-w-md">
-              Ingests Kafka streams from Cilium eBPF and Zeek network sensors directly into an in-memory datastore.
-              Detects anomalous packet flows in microseconds, eliminating MTTD delays.
+              Autonomously provisions adaptive sandbox digital twins in milliseconds, perfectly mimicking production infrastructure to trap attackers.
             </p>
           </div>
         </motion.div>
@@ -79,9 +78,9 @@ export function BentoFeatures() {
           </div>
           
           <div className="relative z-10">
-            <h3 className="text-2xl font-outfit font-medium text-white mb-3">eBPF Containment</h3>
+            <h3 className="text-2xl font-outfit font-medium text-white mb-3">Autonomous Neutralization</h3>
             <p className="text-text-secondary leading-relaxed">
-              Dynamically triggers gRPC policies to sever infected node connections instantly without halting the entire pod network.
+              Silently isolates compromised network segments, nullifies rogue ASNs, and terminates malicious processes without halting the entire pod network.
             </p>
           </div>
         </motion.div>
@@ -100,10 +99,9 @@ export function BentoFeatures() {
             <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 mb-8">
               <Network className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-2xl font-outfit font-medium text-white mb-3">Enterprise Sandbox Twin</h3>
+            <h3 className="text-2xl font-outfit font-medium text-white mb-3">Threat Telemetry & Sandbox Lab</h3>
             <p className="text-text-secondary leading-relaxed max-w-md">
-              Safely test AI remediation logic in an isolated Proxmox/K8s cyber range. 
-              Inject live malware, watch the AI defend, and audit the playbook before deploying to production.
+              Safely test AI deception logic in an isolated cyber range. Inject live malware, watch the system spin up a sandbox twin, and audit the telemetry in real-time.
             </p>
            </div>
 
