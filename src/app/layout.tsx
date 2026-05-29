@@ -54,6 +54,12 @@ export default function RootLayout({
           identityPreviewText: "!text-white font-mono text-sm",
           identityPreviewEditButton: "!text-neon-cyan hover:!text-white transition-colors",
           securedBy: "!text-gray-400",
+          userButtonPopoverCard: "bg-[#050505] border border-white/10 shadow-[0_0_40px_rgba(0,243,255,0.05)] rounded-xl",
+          userPreviewMainIdentifier: "font-mono !text-white font-semibold",
+          userPreviewSecondaryIdentifier: "font-mono !text-gray-400 text-xs",
+          userButtonPopoverActionButton: "!text-white hover:!bg-white/10 transition-colors",
+          userButtonPopoverActionButtonText: "font-mono !text-white",
+          userButtonPopoverActionButtonIcon: "!text-white",
         }
       }}
     >

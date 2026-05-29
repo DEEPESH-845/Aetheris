@@ -105,3 +105,45 @@ body {
     transform: translateX(100%);
   }
 }
+
+/* Clerk UserButton Popover CSS Overrides */
+.cl-userButtonPopoverCard {
+  background-color: #050505 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 40px rgba(0, 243, 255, 0.05) !important;
+}
+
+.cl-userButtonPopoverActionButton {
+  color: #ffffff !important;
+  transition: all 200ms ease !important;
+}
+
+.cl-userButtonPopoverActionButton:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.cl-userButtonPopoverActionButtonText {
+  color: #ffffff !important;
+  font-family: var(--font-mono), monospace !important;
+}
+
+.cl-userButtonPopoverActionButtonIcon {
+  color: #ffffff !important;
+}
+
+.cl-userPreviewMainIdentifier {
+  color: #ffffff !important;
+  font-family: var(--font-mono), monospace !important;
+  font-weight: 600 !important;
+}
+
+.cl-userPreviewSecondaryIdentifier {
+  color: #a1a1aa !important;
+  font-family: var(--font-mono), monospace !important;
+}
+
+.cl-userButtonPopoverFooter,
+.cl-userButtonPopoverFooter * {
+  color: #71717a !important;
+}
+
