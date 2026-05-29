@@ -4,6 +4,9 @@ import random
 import time
 import logging
 import os
+import base64
+import jwt
+from jwt import PyJWKClient
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from ai_core import simulate_ai_reasoning
@@ -25,6 +28,33 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def get_jwks_client():
+    pub_key = os.getenv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY")
+    if not pub_key:
+        return None
+    try:
+        b64_str = pub_key.split('_')[2]
+        padded = b64_str + '=' * (4 - len(b64_str) % 4)
+        domain = base64.b64decode(padded).decode('utf-8').strip('$')
+        return PyJWKClient(f"https://{domain}/.well-known/jwks.json")
+    except Exception as e:
+        logger.error(f"Failed to setup JWKS client: {e}")
+        return None
+
+jwks_client = get_jwks_client()
+rate_limits = {}
+
+async def verify_token(token: str) -> bool:
+    if not jwks_client:
+        return True # Bypass if no env var configured
+    try:
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        jwt.decode(token, signing_key.key, algorithms=["RS256"], options={"verify_aud": False})
+        return True
+    except Exception as e:
+        logger.error(f"JWT Verification failed: {e}")
+        return False
 
 telemetry_queue = asyncio.Queue()
 
@@ -220,6 +250,21 @@ async def startup_event():
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
+    
+    # 1. Authentication Handshake
+    try:
+        auth_msg = await asyncio.wait_for(websocket.receive_text(), timeout=3.0)
+        auth_payload = json.loads(auth_msg)
+        if auth_payload.get("type") != "AUTH" or not await verify_token(auth_payload.get("token", "")):
+            raise Exception("Invalid or missing token")
+    except Exception as e:
+        logger.warning(f"WebSocket auth failed: {e}")
+        manager.disconnect(websocket)
+        await websocket.close(code=1008, reason="Unauthorized")
+        return
+
+    client_ip = websocket.client.host if websocket.client else "unknown"
+
     try:
         while True:
             data = await websocket.receive_text()
@@ -235,9 +280,24 @@ async def websocket_endpoint(websocket: WebSocket):
                     continue
 
                 if msg_type == "PROVISION_SANDBOX":
+                    # Rate limiting (max 5 per minute per IP)
+                    now = time.time()
+                    client_history = rate_limits.get(client_ip, [])
+                    client_history = [t for t in client_history if now - t < 60]
+                    if len(client_history) >= 5:
+                        logger.warning(f"Rate limit exceeded for {client_ip}")
+                        continue
+                        
+                    client_history.append(now)
+                    rate_limits[client_ip] = client_history
+
                     env_id = payload.get("envId")
+                    # Sanitization
                     if not env_id or not isinstance(env_id, str):
                         env_id = f"ENV-{random.randint(100, 999)}"
+                    else:
+                        env_id = ''.join(e for e in env_id if e.isalnum() or e == '-')[:20]
+                        
                     asyncio.create_task(simulate_provisioning(websocket, env_id))
             except json.JSONDecodeError:
                 logger.warning("Received invalid JSON over websocket")

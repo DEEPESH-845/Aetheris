@@ -3,3 +3,5 @@ uvicorn
 websockets
 langgraph
 langchain-core
+PyJWT
+cryptography
