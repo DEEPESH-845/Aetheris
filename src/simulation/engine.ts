@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import { useSimulationStore, Threat } from '@/store/useSimulationStore';
 
 export let sendToBackend: ((message: any) => void) | null = null;
@@ -271,6 +272,7 @@ function createDefensiveOperation(threat: import('@/store/useSimulationStore').T
 // ─── Main Engine Hook ──────────────────────────────────────────────────────────
 export function useSimulationEngine() {
   const isSimulationRunning = useSimulationStore(state => state.isSimulationRunning);
+  const { getToken } = useAuth();
   const wsRef  = useRef<WebSocket | null>(null);
   const localRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -461,9 +463,10 @@ export function useSimulationEngine() {
   useEffect(() => {
     let reconnectTimeout: any;
 
-    const connect = () => {
+    const connect = async () => {
       if (!isSimulationRunning || wsRef.current) return;
 
+      const token = await getToken();
       const wsUrl = process.env.NEXT_PUBLIC_BACKEND_WS_URL || 'ws://localhost:8000/ws';
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
@@ -475,6 +478,7 @@ export function useSimulationEngine() {
       };
 
       ws.onopen = () => {
+        ws.send(JSON.stringify({ type: "AUTH", token }));
         console.log("[Aetheris] Connected to Live Telemetry Stream — local generator suspended.");
         // Stop local generator when live backend is connected
         if (localRef.current) {
