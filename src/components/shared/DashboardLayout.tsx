@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Activity, Network, Target, Database, Settings, Menu, X, Cpu, Terminal } from 'lucide-react';
+import { Shield, Activity, Network, Target, Database, Settings, Menu, X, Cpu, Terminal, Brain } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
@@ -12,12 +12,14 @@ import { CyberButton } from '../core/CyberButton';
 import { StatusBadge } from '../core/StatusBadge';
 
 const navItems = [
-  { href: '/dashboard', label: 'Command Center', icon: Activity },
-  { href: '/dashboard/monitoring', label: 'Threat Monitor', icon: Target },
-  { href: '/dashboard/topology', label: 'Network Topology', icon: Network },
-  { href: '/dashboard/orchestration', label: 'Orchestration', icon: Database },
-  { href: '/dashboard/sandbox', label: 'Sandbox Lab', icon: Terminal },
-  { href: '/dashboard/settings', label: 'Configuration', icon: Settings },
+  { href: '/dashboard',              label: 'Command Center',  icon: Activity },
+  { href: '/dashboard/monitoring',   label: 'Threat Monitor',  icon: Target },
+  { href: '/dashboard/ai-core',      label: 'AI Core',         icon: Brain },
+  { href: '/dashboard/topology',     label: 'Network Topology', icon: Network },
+  { href: '/dashboard/orchestration', label: 'Orchestration',  icon: Database },
+  { href: '/dashboard/defensive-ops', label: 'Defensive Ops',  icon: Shield },
+  { href: '/dashboard/sandbox',      label: 'Sandbox Lab',     icon: Terminal },
+  { href: '/dashboard/settings',     label: 'Configuration',   icon: Settings },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -40,7 +42,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-cyber-darker text-text-primary">
+    <div className="flex h-screen overflow-hidden bg-[#06060c] text-text-primary relative">
+      {/* Global Noise Overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-screen bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-50" />
+      
       {/* Sidebar */}
       <AnimatePresence mode="wait">
         {sidebarOpen && (
