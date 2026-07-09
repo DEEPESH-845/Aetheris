@@ -14,6 +14,7 @@ export function SiteHeader() {
     { name: 'Architecture', href: '/architecture' },
     { name: 'Capabilities', href: '/#features' },
     { name: 'Sandbox', href: '/sandbox' },
+    { name: 'Pricing', href: '/pricing' },
   ];
 
   return (

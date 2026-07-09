@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Activity, Network, Target, Database, Settings, Menu, X, Cpu, Terminal, Brain } from 'lucide-react';
+import { Shield, Activity, Network, Target, Database, Settings, Menu, X, Cpu, Terminal, Brain, LayoutDashboard, Users, CreditCard, FileText, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { useSimulationStore } from '@/store/useSimulationStore';
 import { useSimulationEngine } from '@/simulation/engine';
@@ -20,12 +19,19 @@ const navItems = [
   { href: '/dashboard/orchestration', label: 'Orchestration',  icon: Database },
   { href: '/dashboard/defensive-ops', label: 'Defensive Ops',  icon: Shield },
   { href: '/dashboard/sandbox',      label: 'Sandbox Lab',     icon: Terminal },
+  { href: '/dashboard/analytics',    label: 'Analytics',       icon: BarChart3 },
   { href: '/dashboard/settings',     label: 'Configuration',   icon: Settings },
+];
+
+const adminNavItems = [
+  { href: '/dashboard/admin',           label: 'Admin Overview', icon: LayoutDashboard },
+  { href: '/dashboard/admin/members',   label: 'Team Members',   icon: Users },
+  { href: '/dashboard/admin/billing',   label: 'Billing',        icon: CreditCard },
+  { href: '/dashboard/admin/audit-log', label: 'Audit Log',      icon: FileText },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const pathname = usePathname();
   const { globalThreatScore, systemHealth, activeThreats, updateThreatStatus, setGlobalThreatScore } = useSimulationStore();
 
   // Mount the global simulation engine
@@ -66,28 +72,32 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
             <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
               {navItems.map((item) => {
-                const isActive = pathname === item.href;
                 const Icon = item.icon;
                 return (
                   <Link key={item.href} href={item.href}>
-                    <div className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-sm transition-all duration-300 font-mono text-sm uppercase tracking-wider relative group overflow-hidden",
-                      isActive 
-                        ? "text-neon-cyan bg-neon-cyan/10 border border-neon-cyan/30" 
-                        : "text-text-secondary hover:text-white hover:bg-white/5 border border-transparent"
-                    )}>
-                      {isActive && (
-                        <motion.div 
-                          layoutId="sidebar-active"
-                          className="absolute inset-0 bg-gradient-to-r from-neon-cyan/20 to-transparent pointer-events-none"
-                        />
-                      )}
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-sm transition-all duration-300 font-mono text-sm uppercase tracking-wider relative group overflow-hidden text-text-secondary hover:text-white hover:bg-white/5 border border-transparent">
                       <Icon className="w-4 h-4 z-10" />
                       <span className="z-10 mt-0.5">{item.label}</span>
                     </div>
                   </Link>
                 );
               })}
+
+              {/* Admin Section */}
+              <div className="pt-4 mt-4 border-t border-white/10">
+                <p className="px-4 text-[10px] font-mono text-text-muted uppercase tracking-widest mb-2">Admin</p>
+                {adminNavItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link key={item.href} href={item.href}>
+                      <div className="flex items-center gap-3 px-4 py-3 rounded-sm transition-all duration-300 font-mono text-sm uppercase tracking-wider relative group overflow-hidden text-text-secondary hover:text-white hover:bg-white/5 border border-transparent">
+                        <Icon className="w-4 h-4 z-10" />
+                        <span className="z-10 mt-0.5">{item.label}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </nav>
 
             <div className="p-4 border-t border-white/10">
