@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSimulationStore, SandboxTwin, TwinLifecycle, TerraformOperation } from '@/store/useSimulationStore';
 import { CyberPanel } from '@/components/core/CyberPanel';
 import { CyberButton } from '@/components/core/CyberButton';
-import { sendToBackend } from '@/simulation/engine';
 import {
   Server, Terminal, Network, ShieldCheck, Cpu, HardDrive,
   MemoryStick, Globe, CheckCircle2, Loader2, Zap, Database,

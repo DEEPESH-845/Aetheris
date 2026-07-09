@@ -156,7 +156,7 @@ function LangGraphVisualizer() {
 }
 
 // ─── Main AI Core Page ────────────────────────────────────────────────────────
-export default function AICorePagePage() {
+export default function AICorePage() {
   const { attackerProfiles, aiReasoningState } = useSimulationStore();
   const profiles = Object.values(attackerProfiles);
   const allTtps = profiles.flatMap(p => p.ttps);
