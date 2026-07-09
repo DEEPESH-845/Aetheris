@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { Outfit, Fira_Code } from "next/font/google";
+import { Outfit, Fira_Code, Geist } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs'
 import { dark } from '@clerk/themes'
+import { QueryProvider } from "@/providers/QueryProvider";
+import { TrpcProvider } from "@/providers/TrpcProvider";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -65,10 +70,14 @@ export default function RootLayout({
     >
       <html
         lang="en"
-        className={`${outfit.variable} ${firaCode.variable} h-full antialiased dark`}
+        className={cn("h-full", "antialiased", "dark", outfit.variable, firaCode.variable, "font-sans", geist.variable)}
       >
         <body className="min-h-full flex flex-col bg-cyber-darker text-text-primary selection:bg-neon-cyan/30 selection:text-white">
-          {children}
+          <QueryProvider>
+            <TrpcProvider>
+              {children}
+            </TrpcProvider>
+          </QueryProvider>
         </body>
       </html>
     </ClerkProvider>
