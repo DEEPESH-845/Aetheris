@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Multi-Tenancy ─────────────────────────────────────────────────────────────
+
+enum Plan {
+  FREE
+  STARTER
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+model Organization {
+  id                    String   @id @default(cuid())
+  name                  String
+  slug                  String   @unique
+  plan                  Plan     @default(FREE)
+  stripeCustomerId      String?  @unique
+  stripeSubscriptionId  String?  @unique
+  stripePriceId         String?
+  trialEndsAt           DateTime?
+  settings              Json     @default("{}")
+  logoUrl               String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  members               Membership[]
+  teams                 Team[]
+  auditLogs             AuditLog[]
+  notifications         Notification[]
+  apiKeys               ApiKey[]
+  simulations           Simulation[]
+  invitations           Invitation[]
+
+  @@index([slug])
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  avatarUrl     String?
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  memberships   Membership[]
+  activities    Activity[]
+  apiKeys       ApiKey[]
+
+  @@index([email])
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  orgId     String
+  role      Role     @default(MEMBER)
+  teamId    String?
+  createdAt DateTime @default(now())
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  team      Team?      @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, orgId])
+  @@index([orgId])
+  @@index([userId])
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  orgId     String
+  createdAt DateTime @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  members   Membership[]
+  policies  Policy[]
+
+  @@index([orgId])
+}
+
+model Policy {
+  id        String   @id @default(cuid())
+  name      String
+  teamId    String
+  resources Json
+  actions   Json
+  createdAt DateTime @default(now())
+
+  team      Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+}
+
+// ─── Audit & Activity ──────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  orgId     String
+  userId    String?
+  action    String
+  resource  String
+  details   Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([orgId, action])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  message   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  orgId     String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  actionUrl String?
+  createdAt DateTime @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, read, createdAt])
+}
+
+// ─── Simulations & Sandboxes ───────────────────────────────────────────────────
+
+model Simulation {
+  id        String   @id @default(cuid())
+  orgId     String
+  name      String
+  status    String   @default("idle")
+  config    Json?
+  results   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  twins     SandboxTwin[]
+
+  @@index([orgId])
+}
+
+model SandboxTwin {
+  id              String   @id @default(cuid())
+  simulationId    String
+  name            String
+  attackerIp      String?
+  lifecycle       String   @default("CLONING")
+  vmSpecs         Json?
+  attackerSessions Json?
+  iocs            Json?
+  createdAt       DateTime @default(now())
+  destroyedAt     DateTime?
+
+  simulation      Simulation @relation(fields: [simulationId], references: [id], onDelete: Cascade)
+
+  @@index([simulationId])
+}
+
+// ─── API Keys ──────────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  orgId     String
+  name      String
+  keyHash   String   @unique
+  prefix    String
+  scopes    Json?
+  lastUsed  DateTime?
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([keyHash])
+}
+
+model Invitation {
+  id         String    @id @default(cuid())
+  orgId      String
+  email      String
+  role       Role      @default(MEMBER)
+  token      String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, email])
+  @@index([orgId])
+  @@index([token])
+}
+
+// ─── Feature Flags ─────────────────────────────────────────────────────────────
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  enabled     Boolean  @default(false)
+  plans       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
