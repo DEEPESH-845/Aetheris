@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { CyberPanel } from '@/components/core/CyberPanel';
 import { NetworkTopology } from '@/components/visualization/NetworkTopology';
 import { Network, Search, Filter } from 'lucide-react';
@@ -15,7 +15,7 @@ const containerVariants = {
   }
 };
 
-const itemVariants: any = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
   visible: { 
     opacity: 1, 
