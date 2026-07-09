@@ -10,6 +10,7 @@ from jwt import PyJWKClient
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from ai_core import simulate_ai_reasoning
+from collections import defaultdict
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("aetheris.backend")
@@ -25,9 +26,32 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+# ─── Rate Limiter ───────────────────────────────────────────────────────────────
+
+class RateLimiter:
+    def __init__(self, max_requests: int, window_seconds: int):
+        self.max_requests = max_requests
+        self.window = window_seconds
+        self.requests: dict[str, list[float]] = defaultdict(list)
+
+    def is_allowed(self, key: str) -> bool:
+        now = time.time()
+        self.requests[key] = [t for t in self.requests[key] if now - t < self.window]
+        if len(self.requests[key]) >= self.max_requests:
+            return False
+        self.requests[key].append(now)
+        return True
+
+# Global: 100 WebSocket messages/min per IP
+ws_limiter = RateLimiter(max_requests=100, window_seconds=60)
+# Sandbox provisioning: 5 req/min per IP
+sandbox_limiter = RateLimiter(max_requests=5, window_seconds=60)
+
+# ─── JWT Verification ───────────────────────────────────────────────────────────
 
 def get_jwks_client():
     pub_key = os.getenv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY")
@@ -43,11 +67,11 @@ def get_jwks_client():
         return None
 
 jwks_client = get_jwks_client()
-rate_limits = {}
 
 async def verify_token(token: str) -> bool:
     if not jwks_client:
-        return True # Bypass if no env var configured
+        logger.critical("REJECTING: No JWKS client configured. Set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.")
+        return False
     try:
         signing_key = jwks_client.get_signing_key_from_jwt(token)
         jwt.decode(token, signing_key.key, algorithms=["RS256"], options={"verify_aud": False})
@@ -56,7 +80,11 @@ async def verify_token(token: str) -> bool:
         logger.error(f"JWT Verification failed: {e}")
         return False
 
+# ─── Telemetry Queue ────────────────────────────────────────────────────────────
+
 telemetry_queue = asyncio.Queue()
+
+# ─── Connection Manager ─────────────────────────────────────────────────────────
 
 class ConnectionManager:
     def __init__(self):
@@ -68,11 +96,12 @@ class ConnectionManager:
         logger.info(f"Client connected. Total: {len(self.active_connections)}")
 
     def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
         logger.info(f"Client disconnected. Total: {len(self.active_connections)}")
 
     async def broadcast(self, message: dict):
-        for connection in self.active_connections:
+        for connection in self.active_connections[:]:
             try:
                 await connection.send_json(message)
             except Exception as e:
@@ -86,6 +115,8 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+# ─── Simulation Data ────────────────────────────────────────────────────────────
+
 THREAT_TYPES = [
     'Ransomware Payload', 'DDoS Attack', 'SQL Injection',
     'Phishing Campaign', 'Lateral Movement', 'Zero-Day Exploit',
@@ -98,8 +129,9 @@ MITIGATION_ACTIONS = [
 ]
 NODES = ['fw-1', 'web-cluster-1', 'internal-api', 'db-main', 'cloud-storage']
 
+# ─── Backend Tasks ──────────────────────────────────────────────────────────────
+
 async def execute_ansible_mitigation(target_node: str, action: str):
-    """Simulates the backend triggering real Ansible playbooks for Phase 5 orchestration"""
     logs = [
         f"[ANSIBLE] Initiating playbook generation for action: {action}",
         "[ANSIBLE] Connecting to control node via SSH...",
@@ -122,13 +154,10 @@ async def run_ai_reasoning_task(threat: dict, active_threats_state: list):
             threat["status"] = "MITIGATING"
             threat["mitigationAction"] = ai_event["action"]
             await telemetry_queue.put({"type": "UPDATE_THREAT", "data": {"id": threat["id"], "status": "MITIGATING", "action": ai_event["action"]}})
-            
-            # Phase 5: Trigger real-world Ansible execution simulation
             await execute_ansible_mitigation(threat["targetNode"], ai_event["action"])
         else:
             await telemetry_queue.put({"type": "AI_REASONING_LOG", "data": ai_event})
     
-    # Conclude with resolution after mitigation
     await asyncio.sleep(4.0)
     threat["status"] = "RESOLVED"
     await telemetry_queue.put({"type": "UPDATE_THREAT", "data": {"id": threat["id"], "status": "RESOLVED"}})
@@ -176,7 +205,6 @@ async def generate_telemetry():
             if status == "DETECTED" and elapsed > (2000 + random.randint(0, 2000)):
                 threat["status"] = "ANALYZING"
                 events_to_send.append({"type": "UPDATE_THREAT", "data": {"id": threat["id"], "status": "ANALYZING"}})
-                # Offload the rest of the threat lifecycle to the AI LangGraph
                 asyncio.create_task(run_ai_reasoning_task(threat, active_threats_state))
 
         for event in events_to_send:
@@ -192,7 +220,6 @@ async def consume_telemetry():
         telemetry_queue.task_done()
 
 async def simulate_provisioning(websocket: WebSocket, environment_id: str):
-    """Simulates Terraform/Ansible infrastructure provisioning"""
     logs = [
         "INITIALIZING TERRAFORM BACKEND...",
         "ACQUIRING STATE LOCK...",
@@ -216,15 +243,13 @@ async def simulate_provisioning(websocket: WebSocket, environment_id: str):
         "data": {"envId": environment_id, "status": "ONLINE"}
     }, websocket)
     
-    # Start simulating eBPF logs for this environment
     asyncio.create_task(simulate_ebpf_telemetry(websocket, environment_id))
 
 async def simulate_ebpf_telemetry(websocket: WebSocket, environment_id: str):
-    """Simulates incoming Cilium eBPF packet logs from the provisioned cluster"""
     endpoints = ["web-front", "auth-service", "redis-cache", "db-primary", "payment-api"]
     calls = ["tcp_connect", "sys_execve", "sys_open", "tcp_close", "udp_sendmsg"]
     
-    for _ in range(50): # Send 50 packets then stop for demo purposes
+    for _ in range(50):
         await asyncio.sleep(random.uniform(0.1, 0.8))
         await manager.send_personal_message({
             "type": "EBPF_LOG",
@@ -238,20 +263,30 @@ async def simulate_ebpf_telemetry(websocket: WebSocket, environment_id: str):
             }
         }, websocket)
 
-@app.get("/")
-async def root():
-    return {"message": "Aetheris Backend is online and active.", "status": "healthy"}
+# ─── Startup Validation ─────────────────────────────────────────────────────────
 
 @app.on_event("startup")
 async def startup_event():
+    required_envs = ["NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"]
+    missing = [e for e in required_envs if not os.getenv(e)]
+    if missing:
+        logger.critical(f"Missing required env vars: {missing}. WebSocket auth will reject all connections.")
+    else:
+        logger.info("All required environment variables present.")
+    
     asyncio.create_task(generate_telemetry())
     asyncio.create_task(consume_telemetry())
+
+# ─── Endpoints ──────────────────────────────────────────────────────────────────
+
+@app.get("/")
+async def root():
+    return {"message": "Aetheris Backend is online and active.", "status": "healthy"}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     
-    # 1. Authentication Handshake
     try:
         auth_msg = await asyncio.wait_for(websocket.receive_text(), timeout=3.0)
         auth_payload = json.loads(auth_msg)
@@ -268,6 +303,12 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
+
+            # Global rate limiting for all WebSocket messages
+            if not ws_limiter.is_allowed(client_ip):
+                logger.warning(f"Global rate limit exceeded for {client_ip}")
+                continue
+
             try:
                 payload = json.loads(data)
                 
@@ -280,19 +321,11 @@ async def websocket_endpoint(websocket: WebSocket):
                     continue
 
                 if msg_type == "PROVISION_SANDBOX":
-                    # Rate limiting (max 5 per minute per IP)
-                    now = time.time()
-                    client_history = rate_limits.get(client_ip, [])
-                    client_history = [t for t in client_history if now - t < 60]
-                    if len(client_history) >= 5:
-                        logger.warning(f"Rate limit exceeded for {client_ip}")
+                    if not sandbox_limiter.is_allowed(client_ip):
+                        logger.warning(f"Sandbox rate limit exceeded for {client_ip}")
                         continue
-                        
-                    client_history.append(now)
-                    rate_limits[client_ip] = client_history
 
                     env_id = payload.get("envId")
-                    # Sanitization
                     if not env_id or not isinstance(env_id, str):
                         env_id = f"ENV-{random.randint(100, 999)}"
                     else:
@@ -305,4 +338,3 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.error(f"Error processing websocket message: {e}")
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
