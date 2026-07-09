@@ -4,8 +4,6 @@ import { useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useSimulationStore, Threat } from '@/store/useSimulationStore';
 
-export let sendToBackend: ((message: any) => void) | null = null;
-
 // ─── Realistic Telemetry Data Pools ───────────────────────────────────────────
 
 const INTERNAL_IPS = ['10.0.1.15', '10.0.2.44', '10.0.3.201', '10.0.4.12', '172.16.0.5', '172.16.1.88'];
@@ -283,8 +281,6 @@ export function useSimulationEngine() {
       return;
     }
 
-    const state = useSimulationStore.getState();
-
     // Staggered generators at different frequencies to mimic real pipeline cadence
     let tick = 0;
     localRef.current = setInterval(() => {
@@ -461,7 +457,7 @@ export function useSimulationEngine() {
 
   // ── WebSocket Client (connects to real backend when available) ──
   useEffect(() => {
-    let reconnectTimeout: any;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const connect = async () => {
       if (!isSimulationRunning || wsRef.current) return;
@@ -470,12 +466,6 @@ export function useSimulationEngine() {
       const wsUrl = process.env.NEXT_PUBLIC_BACKEND_WS_URL || 'ws://localhost:8000/ws';
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
-      
-      sendToBackend = (msg) => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify(msg));
-        }
-      };
 
       ws.onopen = () => {
         ws.send(JSON.stringify({ type: "AUTH", token }));
@@ -539,7 +529,6 @@ export function useSimulationEngine() {
       ws.onclose = () => {
         console.log("[Aetheris] Disconnected from Telemetry Stream — local generator resuming.");
         wsRef.current = null;
-        sendToBackend = null;
         if (useSimulationStore.getState().isSimulationRunning) {
           reconnectTimeout = setTimeout(connect, 3000);
         }
@@ -553,7 +542,6 @@ export function useSimulationEngine() {
     } else {
       wsRef.current?.close();
       wsRef.current = null;
-      sendToBackend = null;
       clearTimeout(reconnectTimeout);
     }
 
@@ -561,7 +549,6 @@ export function useSimulationEngine() {
       clearTimeout(reconnectTimeout);
       wsRef.current?.close();
       wsRef.current = null;
-      sendToBackend = null;
     };
   }, [isSimulationRunning]);
 
