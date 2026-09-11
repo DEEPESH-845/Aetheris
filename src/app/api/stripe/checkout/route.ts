@@ -39,15 +39,7 @@ export async function POST(req: NextRequest) {
         },
         include: { members: true },
       });
-      membership = {
-        id: org.members[0].id,
-        userId: session.userId,
-        orgId: org.id,
-        role: "OWNER",
-        teamId: null,
-        createdAt: new Date(),
-        org,
-      } as any;
+      membership = { ...org.members[0], org };
     }
 
     if (!membership) {

@@ -24,7 +24,7 @@ export function ThreatScoreChart({ showAxis = false }: ThreatScoreChartProps) {
   const stroke = globalThreatScore > 75 ? colors.danger : colors.accent;
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 48 }}>
       <AreaChart data={data} margin={{ top: 2, right: 0, left: showAxis ? 0 : 0, bottom: 0 }}>
         <defs>
           <linearGradient id="threatFill" x1="0" y1="0" x2="0" y2="1">

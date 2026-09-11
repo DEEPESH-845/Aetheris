@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { useSimulationStore, Threat } from '@/store/useSimulationStore';
+import { useSimulationStore, Threat, MitreTactic, TelemetryEvent } from '@/store/useSimulationStore';
 
 // ─── Realistic Telemetry Data Pools ───────────────────────────────────────────
 
@@ -58,25 +58,25 @@ const MITRE_TTPS = [
 
 const AI_REASONING_THOUGHTS: Record<string, { text: string; type: 'info' | 'warning' | 'action' | 'success' }[]> = {
   INGEST: [
-    { text: 'Zeek conn log ingested — uid=C4A9F2 src=185.220.101.3:54312 → dst=10.0.2.44:22 proto=tcp', type: 'info' },
-    { text: 'Suricata alert: SID 2019284 — ET MALWARE Cobalt Strike Beacon. Confidence: HIGH', type: 'warning' },
+    { text: 'Zeek conn log ingested - uid=C4A9F2 src=185.220.101.3:54312 → dst=10.0.2.44:22 proto=tcp', type: 'info' },
+    { text: 'Suricata alert: SID 2019284 - ET MALWARE Cobalt Strike Beacon. Confidence: HIGH', type: 'warning' },
     { text: 'eBPF event: ptrace() syscall on PID 4821 (bash) → parent: python3. Anomaly flagged.', type: 'warning' },
     { text: 'PCAP buffer flushed to Kafka topic [threat-events]. Offset: 0x3F4A2C', type: 'info' },
   ],
   ENRICH: [
     { text: 'Querying Qdrant vector DB for IP 185.220.101.3... 14 historical matches found.', type: 'info' },
-    { text: 'RAG retrieval complete — context window: MITRE ATT&CK T1190, T1021.001, T1003.001', type: 'info' },
+    { text: 'RAG retrieval complete - context window: MITRE ATT&CK T1190, T1021.001, T1003.001', type: 'info' },
     { text: 'GeoIP enrichment: AS44050 Petersburg Internet Network → RU / Saint Petersburg', type: 'warning' },
     { text: 'Threat actor fingerprint correlates with APT28 toolchain. Confidence: 87.3%', type: 'warning' },
   ],
   CORRELATE: [
-    { text: 'LangGraph node [CorrelateKillChain] — mapping TTPs to MITRE ATT&CK kill chain…', type: 'action' },
+    { text: 'LangGraph node [CorrelateKillChain] - mapping TTPs to MITRE ATT&CK kill chain…', type: 'action' },
     { text: 'Kill chain stage determined: LATERAL MOVEMENT (T1021.001 RDP)', type: 'warning' },
     { text: 'Cross-referencing Qdrant embeddings against 12,847 historical APT campaigns…', type: 'info' },
-    { text: 'Behavioral cluster match: APT28 "FancyBear" — cosine similarity 0.934', type: 'warning' },
+    { text: 'Behavioral cluster match: APT28 "FancyBear" - cosine similarity 0.934', type: 'warning' },
   ],
   DECIDE: [
-    { text: 'LangGraph node [FormulateMitigation] — evaluating 3 countermeasure strategies…', type: 'action' },
+    { text: 'LangGraph node [FormulateMitigation] - evaluating 3 countermeasure strategies…', type: 'action' },
     { text: 'STRATEGY A: Hard block src IP → Risk: attacker pivots. Score: 0.42', type: 'info' },
     { text: 'STRATEGY B: Redirect to honey network → Attacker contained + IOC extraction. Score: 0.91', type: 'action' },
     { text: 'OPTIMAL: Activating eBPF traffic redirect → honey-api-proxy node. Attacker unaware.', type: 'action' },
@@ -84,7 +84,7 @@ const AI_REASONING_THOUGHTS: Record<string, { text: string; type: 'info' | 'warn
   EXECUTE: [
     { text: 'gRPC → Cilium API: NetworkPolicy applied. Attacker TCP session proxied to 10.0.99.10.', type: 'success' },
     { text: 'Deception Engine: Serving synthetic /etc/passwd with 847 fake credentials.', type: 'success' },
-    { text: 'Honey database online — injecting believable schema: users, transactions, api_keys.', type: 'success' },
+    { text: 'Honey database online - injecting believable schema: users, transactions, api_keys.', type: 'success' },
     { text: 'Attacker now operating inside air-gapped digital twin. IOC extraction initiated.', type: 'success' },
   ],
 };
@@ -104,7 +104,7 @@ function generateAttackerProfile(threat: { id: string; sourceIp: string; type: s
     tooling: actor.tooling,
     killChainStage: 'Lateral Movement',
     ttps: shuffled.map(t => ({
-      tactic: t.tactic as any,
+      tactic: t.tactic as MitreTactic,
       technique: t.technique,
       name: t.name,
       confidence: randInt(60, 99),
@@ -138,7 +138,7 @@ function generateZeekEvent() {
     ts: Date.now(),
     source: 'ZEEK' as const,
     raw,
-    severity: (state === 'REJ' || state === 'S0' ? 'medium' : isHoney ? 'high' : 'low') as any,
+    severity: (state === 'REJ' || state === 'S0' ? 'medium' : isHoney ? 'high' : 'low') as TelemetryEvent['severity'],
     srcIp,
     destIp,
     proto,
@@ -183,7 +183,7 @@ function generateEbpfEvent() {
     ts: Date.now(),
     source: 'EBPF' as const,
     raw,
-    severity: (isSuspicious ? 'high' : isHoney ? 'medium' : 'low') as any,
+    severity: (isSuspicious ? 'high' : isHoney ? 'medium' : 'low') as TelemetryEvent['severity'],
     syscall,
     process,
   };
@@ -469,7 +469,7 @@ export function useSimulationEngine() {
 
       ws.onopen = () => {
         ws.send(JSON.stringify({ type: "AUTH", token }));
-        console.log("[Aetheris] Connected to Live Telemetry Stream — local generator suspended.");
+        console.log("[Aetheris] Connected to Live Telemetry Stream - local generator suspended.");
         // Stop local generator when live backend is connected
         if (localRef.current) {
           clearInterval(localRef.current);
@@ -527,7 +527,7 @@ export function useSimulationEngine() {
       };
 
       ws.onclose = () => {
-        console.log("[Aetheris] Disconnected from Telemetry Stream — local generator resuming.");
+        console.log("[Aetheris] Disconnected from Telemetry Stream - local generator resuming.");
         wsRef.current = null;
         if (useSimulationStore.getState().isSimulationRunning) {
           reconnectTimeout = setTimeout(connect, 3000);
@@ -550,7 +550,7 @@ export function useSimulationEngine() {
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [isSimulationRunning]);
+  }, [isSimulationRunning, getToken]);
 
   return null;
 }

@@ -1,6 +1,5 @@
 import { Role } from "@prisma/client";
 
-type Resource = string;
 type Action = "read" | "write" | "execute" | "delete" | "admin";
 
 const ROLE_PERMISSIONS: Record<Role, { can: Array<{ resource: string; actions: Action[] }> }> = {

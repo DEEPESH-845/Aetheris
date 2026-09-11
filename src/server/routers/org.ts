@@ -1,6 +1,5 @@
 import { router, protectedProcedure, adminProcedure } from "../trpc";
 import { z } from "zod";
-import { Prisma } from "@prisma/client";
 
 export const orgRouter = router({
   getCurrent: protectedProcedure.query(async ({ ctx }) => {

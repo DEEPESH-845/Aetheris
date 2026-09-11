@@ -21,7 +21,7 @@ export function NetworkTrafficChart() {
   }, [traffic]);
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 48 }}>
       <BarChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }} barCategoryGap={2}>
         <Tooltip
           cursor={{ fill: colors.border }}

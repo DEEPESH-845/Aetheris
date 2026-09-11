@@ -36,7 +36,7 @@ export interface MitreTTP {
   tactic: MitreTactic;
   technique: string;     // e.g. "T1059.001"
   name: string;          // e.g. "PowerShell"
-  confidence: number;    // 0–100
+  confidence: number;    // 0-100
   observed: boolean;
 }
 
@@ -143,11 +143,19 @@ export interface AIThought {
   type: 'info' | 'warning' | 'action' | 'success';
 }
 
+export interface EBPFLog {
+  timestamp: number;
+  pod?: string;
+  syscall: string;
+  pid: number;
+  verdict: 'FORWARDED' | 'DROPPED';
+}
+
 export interface SandboxEnvironment {
   id: string;
   status: 'PROVISIONING' | 'ONLINE' | 'DESTROYED';
   logs: string[];
-  ebpfLogs: any[];
+  ebpfLogs: EBPFLog[];
 }
 
 export interface NetworkNode {
@@ -195,7 +203,7 @@ interface SimulationState {
   initSandboxEnvironment: (envId: string) => void;
   addOrchestrationLog: (envId: string, log: string) => void;
   updateSandboxStatus: (envId: string, status: SandboxEnvironment['status']) => void;
-  addEBPFLog: (envId: string, log: any) => void;
+  addEBPFLog: (envId: string, log: EBPFLog) => void;
   // Phase 3 actions
   addTelemetryEvent: (event: Omit<TelemetryEvent, 'id'>) => void;
   updatePipelineHealth: (health: Partial<PipelineHealth>) => void;

@@ -76,9 +76,10 @@ export async function POST(req: NextRequest) {
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        const subscriptionId = (invoice as any).subscription as string;
-        if (subscriptionId) {
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const subscriptionId = (invoice as Stripe.Invoice & { subscription?: string | { id: string } | null }).subscription;
+        const subId = typeof subscriptionId === 'string' ? subscriptionId : subscriptionId?.id;
+        if (subId) {
+          const subscription = await stripe.subscriptions.retrieve(subId);
           const orgId = subscription.metadata.orgId;
           if (orgId) {
             await prisma.notification.create({
