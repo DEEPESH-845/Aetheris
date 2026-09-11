@@ -1,103 +1,99 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Shield, Filter } from "lucide-react";
+import { ClipboardText } from "@phosphor-icons/react";
 import { api } from "@/utils/trpc";
-import { CyberPanel } from "@/components/core/CyberPanel";
-import { CyberButton } from "@/components/core/CyberButton";
-import { StatusBadge } from "@/components/core/StatusBadge";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { Panel, PanelBody } from "@/components/shared/Panel";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
-const ACTION_COLORS: Record<string, string> = {
-  "threat.detected": "text-neon-red",
-  "threat.mitigated": "text-neon-green",
-  "sandbox.provisioned": "text-neon-cyan",
-  "member.invited": "text-neon-purple",
-  "plan.changed": "text-yellow-400",
-  "settings.updated": "text-text-secondary",
+const PAGE_SIZE = 50;
+
+interface AuditRow {
+  id: string;
+  action: string;
+  resource: string;
+  ip: string | null;
+  createdAt: string | Date;
+}
+
+const actionTone: Record<string, string> = {
+  "threat.detected": "text-danger",
+  "threat.mitigated": "text-success",
+  "sandbox.provisioned": "text-accent",
+  "member.invited": "text-ink",
+  "plan.changed": "text-accent",
+  "settings.updated": "text-ink-muted",
 };
+
+const dateTime = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" });
 
 export default function AuditLogPage() {
   const [page, setPage] = useState(0);
-  const { data, isLoading } = api.audit.list.useQuery({ limit: 50, offset: page * 50, action: undefined });
-
-  const logs = (data as any)?.logs ?? [];
-  const total = (data as any)?.total ?? 0;
+  const { data, isLoading, isError, error } = api.audit.list.useQuery({ limit: PAGE_SIZE, offset: page * PAGE_SIZE, action: undefined });
+  const logs = (data?.logs ?? []) as AuditRow[];
+  const total = data?.total ?? 0;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-outfit text-2xl font-bold text-white">Audit Log</h1>
-          <p className="text-text-secondary text-sm mt-1">
-            {total} event{total !== 1 ? "s" : ""} recorded
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-col gap-4">
+      <PageHeader title="Audit log" description={`${total} ${total === 1 ? "event" : "events"} recorded for this organization.`} />
 
-      {isLoading ? (
-        <CyberPanel className="p-12 text-center">
-          <p className="text-text-muted font-mono text-sm">Loading audit logs...</p>
-        </CyberPanel>
-      ) : logs.length === 0 ? (
-        <CyberPanel className="p-12 text-center">
-          <Shield className="w-8 h-8 text-text-muted mx-auto mb-3" />
-          <p className="text-text-secondary">No audit events yet</p>
-          <p className="text-text-muted text-xs mt-1">Events will appear as your team uses the platform</p>
-        </CyberPanel>
-      ) : (
-        <div className="space-y-1">
-          {logs.map((log: any, i: number) => (
-            <motion.div
-              key={log.id}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02 }}
-            >
-              <CyberPanel className="p-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs font-mono font-bold ${ACTION_COLORS[log.action] ?? "text-text-secondary"}`}>
-                      {log.action}
-                    </span>
-                    <span className="text-text-secondary text-xs font-mono">{log.resource}</span>
-                    {log.ip && (
-                      <span className="text-text-muted text-[10px] font-mono">{log.ip}</span>
-                    )}
-                  </div>
-                  <span className="text-text-muted text-[10px] font-mono">
-                    {new Date(log.createdAt).toLocaleString()}
-                  </span>
-                </div>
-              </CyberPanel>
-            </motion.div>
-          ))}
-        </div>
-      )}
+      <Panel>
+        <PanelBody padded={false}>
+          {isLoading ? (
+            <div className="flex flex-col gap-3 p-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-8" />
+              ))}
+            </div>
+          ) : isError ? (
+            <p className="p-4 text-sm text-danger" role="alert">
+              Could not load the audit log: {error.message}
+            </p>
+          ) : logs.length === 0 ? (
+            <EmptyState icon={ClipboardText} title="No audit events yet" hint="Events are recorded as your team uses the platform." />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Resource</TableHead>
+                  <TableHead>IP</TableHead>
+                  <TableHead className="text-right">When</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {logs.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell className={cn("font-mono text-xs", actionTone[log.action] ?? "text-ink")}>{log.action}</TableCell>
+                    <TableCell className="font-mono text-xs text-ink-muted">{log.resource}</TableCell>
+                    <TableCell className="font-mono text-xs text-ink-subtle">{log.ip ?? ""}</TableCell>
+                    <TableCell className="text-right font-mono text-xs text-ink-muted">{dateTime.format(new Date(log.createdAt))}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </PanelBody>
+      </Panel>
 
-      {/* Pagination */}
-      {total > 50 && (
-        <div className="flex justify-center gap-2">
-          <CyberButton
-            variant="ghost"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-          >
+      {total > PAGE_SIZE && (
+        <nav className="flex items-center justify-center gap-3" aria-label="Pagination">
+          <Button variant="secondary" size="sm" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}>
             Previous
-          </CyberButton>
-          <span className="text-text-muted text-sm font-mono self-center">
-            Page {page + 1} of {Math.ceil(total / 50)}
+          </Button>
+          <span className="font-mono text-xs text-ink-muted">
+            Page {page + 1} of {pages}
           </span>
-          <CyberButton
-            variant="ghost"
-            size="sm"
-            onClick={() => setPage((p) => p + 1)}
-            disabled={(page + 1) * 50 >= total}
-          >
+          <Button variant="secondary" size="sm" onClick={() => setPage((p) => p + 1)} disabled={(page + 1) * PAGE_SIZE >= total}>
             Next
-          </CyberButton>
-        </div>
+          </Button>
+        </nav>
       )}
     </div>
   );

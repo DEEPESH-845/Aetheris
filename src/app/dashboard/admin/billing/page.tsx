@@ -1,47 +1,80 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { motion } from "framer-motion";
-import { ExternalLink, ArrowUpRight, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { ArrowSquareOut, ArrowUpRight, CheckCircle, XCircle } from "@phosphor-icons/react";
 import { useSubscription } from "@/hooks/useSubscription";
-import { CyberButton } from "@/components/core/CyberButton";
-import { CyberPanel } from "@/components/core/CyberPanel";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { Panel, PanelBody, PanelHeader } from "@/components/shared/Panel";
 import { PlanBadge } from "@/components/shared/PlanBadge";
+import { StatBlock } from "@/components/shared/StatBlock";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+
+const dateFmt = new Intl.DateTimeFormat("en-GB", { dateStyle: "long" });
+
+const UPGRADES: Record<string, { plan: string; label: string; primary?: boolean }[]> = {
+  FREE: [
+    { plan: "STARTER", label: "Starter, $29/mo" },
+    { plan: "PRO", label: "Pro, $99/mo", primary: true },
+    { plan: "BUSINESS", label: "Business, $299/mo" },
+  ],
+  STARTER: [
+    { plan: "PRO", label: "Upgrade to Pro, $99/mo", primary: true },
+    { plan: "BUSINESS", label: "Upgrade to Business, $299/mo" },
+  ],
+  PRO: [{ plan: "BUSINESS", label: "Upgrade to Business, $299/mo", primary: true }],
+};
+
+function Notice({ tone, title, body, onDismiss }: { tone: "success" | "danger"; title: string; body?: string; onDismiss?: () => void }) {
+  const IconComponent = tone === "success" ? CheckCircle : XCircle;
+  return (
+    <div
+      role={tone === "danger" ? "alert" : "status"}
+      className={cn(
+        "flex items-start gap-3 rounded-panel border px-4 py-3",
+        tone === "success" ? "border-success/30 bg-success-soft" : "border-danger/30 bg-danger-soft",
+      )}
+    >
+      <IconComponent size={18} className={cn("mt-0.5 shrink-0", tone === "success" ? "text-success" : "text-danger")} aria-hidden="true" />
+      <div className="min-w-0 flex-1">
+        <p className={cn("text-sm font-medium", tone === "success" ? "text-success" : "text-danger")}>{title}</p>
+        {body && <p className="text-sm text-ink-muted">{body}</p>}
+      </div>
+      {onDismiss && (
+        <Button variant="ghost" size="sm" onClick={onDismiss}>
+          Dismiss
+        </Button>
+      )}
+    </div>
+  );
+}
 
 function BillingContent() {
-  const { subscription, plan, isTrialActive, limits } = useSubscription();
+  const { subscription, plan, isTrialActive, limits, isLoading } = useSubscription();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
-
   const checkoutSuccess = searchParams.get("success") === "true";
   const checkoutCanceled = searchParams.get("canceled") === "true";
 
   async function handleCheckout(planType: string) {
     setCheckoutLoading(planType);
     setError(null);
-
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planType, interval: "monthly" }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create checkout session");
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      if (!res.ok) throw new Error(data.error || "Could not start checkout. Try again.");
+      if (data.url) window.location.assign(data.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not start checkout. Try again.");
       setCheckoutLoading(null);
     }
   }
@@ -49,242 +82,99 @@ function BillingContent() {
   async function handlePortal() {
     setPortalLoading(true);
     setError(null);
-
     try {
-      const res = await fetch("/api/stripe/portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
+      const res = await fetch("/api/stripe/portal", { method: "POST", headers: { "Content-Type": "application/json" } });
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to open billing portal");
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      if (!res.ok) throw new Error(data.error || "Could not open the billing portal. Try again.");
+      if (data.url) window.location.assign(data.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not open the billing portal. Try again.");
       setPortalLoading(false);
     }
   }
 
+  const upgrades = UPGRADES[plan] ?? [];
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-outfit text-2xl font-bold text-white">Billing</h1>
-        <p className="text-text-secondary text-sm mt-1">Manage your subscription and payment</p>
-      </div>
+    <div className="flex flex-col gap-4">
+      <PageHeader title="Billing" description="Your plan, usage limits, and payment details." />
 
-      {/* Success/Cancel Messages */}
-      {checkoutSuccess && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-neon-green/10 border border-neon-green/30 rounded-sm flex items-center gap-3"
-        >
-          <CheckCircle className="w-5 h-5 text-neon-green flex-shrink-0" />
-          <div>
-            <p className="text-neon-green text-sm font-medium">Payment successful!</p>
-            <p className="text-text-secondary text-xs">Your subscription is now active. Welcome to your new plan.</p>
-          </div>
-        </motion.div>
-      )}
+      {checkoutSuccess && <Notice tone="success" title="Payment complete" body="Your subscription is active on the new plan." />}
+      {checkoutCanceled && <Notice tone="danger" title="Checkout canceled" body="Nothing was charged. You can start again whenever you like." />}
+      {error && <Notice tone="danger" title={error} onDismiss={() => setError(null)} />}
 
-      {checkoutCanceled && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-neon-red/10 border border-neon-red/30 rounded-sm flex items-center gap-3"
-        >
-          <XCircle className="w-5 h-5 text-neon-red flex-shrink-0" />
-          <div>
-            <p className="text-neon-red text-sm font-medium">Checkout canceled</p>
-            <p className="text-text-secondary text-xs">No worries - you can try again anytime.</p>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-neon-red/10 border border-neon-red/30 rounded-sm flex items-center gap-3"
-        >
-          <XCircle className="w-5 h-5 text-neon-red flex-shrink-0" />
-          <div>
-            <p className="text-neon-red text-sm font-medium">{error}</p>
-            <button
-              onClick={() => setError(null)}
-              className="text-neon-red/60 text-xs mt-1 hover:text-neon-red"
-            >
-              Dismiss
-            </button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Current Plan */}
-      <CyberPanel className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="font-outfit text-lg font-bold text-white">Current Plan</h2>
-              <PlanBadge plan={plan} />
-            </div>
-            {isTrialActive && subscription?.trialEndsAt && (
-              <p className="text-text-secondary text-sm">
-                Trial ends {new Date(subscription.trialEndsAt).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-2">
-            {plan === "FREE" ? (
-              <Link href="/pricing">
-                <CyberButton variant="primary" size="sm">
-                  <ArrowUpRight className="w-4 h-4 mr-2" />
-                  Upgrade
-                </CyberButton>
-              </Link>
+      <Panel>
+        <PanelHeader
+          title="Current plan"
+          actions={
+            plan === "FREE" ? (
+              <Button size="sm" render={<Link href="/pricing" />}>
+                <ArrowUpRight aria-hidden="true" />
+                Upgrade
+              </Button>
             ) : (
-              <CyberButton
-                variant="outline"
-                size="sm"
-                onClick={handlePortal}
-                disabled={portalLoading}
-              >
-                {portalLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                )}
-                Manage Subscription
-              </CyberButton>
-            )}
-          </div>
-        </div>
-      </CyberPanel>
+              <Button variant="secondary" size="sm" onClick={handlePortal} disabled={portalLoading}>
+                <ArrowSquareOut aria-hidden="true" />
+                {portalLoading ? "Opening…" : "Manage subscription"}
+              </Button>
+            )
+          }
+        />
+        <PanelBody className="flex items-center gap-3">
+          {isLoading ? (
+            <Skeleton className="h-5 w-32" />
+          ) : (
+            <>
+              <PlanBadge plan={plan} />
+              {isTrialActive && subscription?.trialEndsAt && (
+                <span className="text-sm text-ink-muted">Trial ends {dateFmt.format(new Date(subscription.trialEndsAt))}</span>
+              )}
+            </>
+          )}
+        </PanelBody>
+      </Panel>
 
-      {/* Usage Limits */}
       {limits && (
-        <CyberPanel className="p-6">
-          <h3 className="font-outfit font-bold text-white mb-4">Usage Limits</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Panel>
+          <PanelHeader title="Usage limits" />
+          <div className="grid grid-cols-2 divide-y md:grid-cols-4 md:divide-x md:divide-y-0">
             {[
-              { label: "Simulations", value: limits.simulations, suffix: "/month" },
-              { label: "Sandbox Twins", value: limits.twins, suffix: "/month" },
-              { label: "API Calls", value: limits.apiCalls, suffix: "/month" },
-              { label: "Team Members", value: limits.members, suffix: "" },
+              { label: "Simulations", value: limits.simulations, unit: "per month" },
+              { label: "Sandbox twins", value: limits.twins, unit: "per month" },
+              { label: "API calls", value: limits.apiCalls, unit: "per month" },
+              { label: "Team members", value: limits.members },
             ].map((item) => (
-              <div key={item.label} className="bg-black/40 border border-white/10 rounded-sm p-4">
-                <p className="text-text-muted text-xs font-mono uppercase">{item.label}</p>
-                <p className="text-white text-xl font-bold mt-1">
-                  {item.value === -1 ? "Unlimited" : item.value}
-                  {item.value !== -1 && <span className="text-text-muted text-sm">{item.suffix}</span>}
-                </p>
-              </div>
+              <StatBlock
+                key={item.label}
+                label={item.label}
+                value={item.value === -1 ? "Unlimited" : item.value}
+                unit={item.value === -1 ? undefined : item.unit}
+              />
             ))}
           </div>
-        </CyberPanel>
+        </Panel>
       )}
 
-      {/* Quick Upgrade */}
-      {plan === "FREE" && (
-        <CyberPanel className="p-6">
-          <h3 className="font-outfit font-bold text-white mb-4">Ready to upgrade?</h3>
-          <p className="text-text-secondary text-sm mb-4">
-            Unlock AI-powered deception, autonomous defense, and team collaboration.
-          </p>
-          <div className="flex gap-2">
-            <CyberButton
-              variant="outline"
-              size="sm"
-              onClick={() => handleCheckout("STARTER")}
-              disabled={checkoutLoading !== null}
-            >
-              {checkoutLoading === "STARTER" ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : null}
-              Starter $29/mo
-            </CyberButton>
-            <CyberButton
-              variant="primary"
-              size="sm"
-              onClick={() => handleCheckout("PRO")}
-              disabled={checkoutLoading !== null}
-            >
-              {checkoutLoading === "PRO" ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : null}
-              Pro $99/mo
-            </CyberButton>
-            <CyberButton
-              variant="outline"
-              size="sm"
-              onClick={() => handleCheckout("BUSINESS")}
-              disabled={checkoutLoading !== null}
-            >
-              {checkoutLoading === "BUSINESS" ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : null}
-              Business $299/mo
-            </CyberButton>
-          </div>
-        </CyberPanel>
-      )}
-
-      {/* Upgrade Options for Paid Plans */}
-      {plan !== "FREE" && plan !== "BUSINESS" && (
-        <CyberPanel className="p-6">
-          <h3 className="font-outfit font-bold text-white mb-4">Upgrade your plan</h3>
-          <p className="text-text-secondary text-sm mb-4">
-            Get more features and capacity for your growing team.
-          </p>
-          <div className="flex gap-2">
-            {plan === "STARTER" && (
-              <>
-                <CyberButton
-                  variant="primary"
-                  size="sm"
-                  onClick={() => handleCheckout("PRO")}
-                  disabled={checkoutLoading !== null}
-                >
-                  {checkoutLoading === "PRO" ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : null}
-                  Upgrade to Pro $99/mo
-                </CyberButton>
-                <CyberButton
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCheckout("BUSINESS")}
-                  disabled={checkoutLoading !== null}
-                >
-                  {checkoutLoading === "BUSINESS" ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : null}
-                  Upgrade to Business $299/mo
-                </CyberButton>
-              </>
-            )}
-            {plan === "PRO" && (
-              <CyberButton
-                variant="primary"
+      {upgrades.length > 0 && (
+        <Panel>
+          <PanelHeader
+            title={plan === "FREE" ? "Upgrade" : "Upgrade your plan"}
+            description={plan === "FREE" ? "Unlock the AI core, autonomous defense, and team seats." : "More capacity and features as the team grows."}
+          />
+          <PanelBody className="flex flex-wrap gap-2">
+            {upgrades.map((u) => (
+              <Button
+                key={u.plan}
+                variant={u.primary ? "primary" : "secondary"}
                 size="sm"
-                onClick={() => handleCheckout("BUSINESS")}
+                onClick={() => handleCheckout(u.plan)}
                 disabled={checkoutLoading !== null}
               >
-                {checkoutLoading === "BUSINESS" ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : null}
-                Upgrade to Business $299/mo
-              </CyberButton>
-            )}
-          </div>
-        </CyberPanel>
+                {checkoutLoading === u.plan ? "Redirecting…" : u.label}
+              </Button>
+            ))}
+          </PanelBody>
+        </Panel>
       )}
     </div>
   );
@@ -292,19 +182,15 @@ function BillingContent() {
 
 export default function BillingPage() {
   return (
-    <Suspense fallback={
-      <div className="space-y-6">
-        <div>
-          <h1 className="font-outfit text-2xl font-bold text-white">Billing</h1>
-          <p className="text-text-secondary text-sm mt-1">Manage your subscription and payment</p>
+    <Suspense
+      fallback={
+        <div className="flex flex-col gap-4">
+          <PageHeader title="Billing" description="Your plan, usage limits, and payment details." />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-32" />
         </div>
-        <CyberPanel className="p-6">
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 text-neon-cyan animate-spin" />
-          </div>
-        </CyberPanel>
-      </div>
-    }>
+      }
+    >
       <BillingContent />
     </Suspense>
   );

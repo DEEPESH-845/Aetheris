@@ -1,119 +1,77 @@
 "use client";
 
-import { CyberPanel } from "@/components/core/CyberPanel";
 import { useSimulationStore } from "@/store/useSimulationStore";
-import { Activity, ShieldAlert, Zap, Server } from "lucide-react";
-import { ThreatScoreChart } from "@/components/visualization/ThreatScoreChart";
-import { NetworkTrafficChart } from "@/components/visualization/NetworkTrafficChart";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { Panel, PanelBody, PanelHeader } from "@/components/shared/Panel";
+import { StatBlock } from "@/components/shared/StatBlock";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { PipelineStatusBar } from "@/components/dashboard/PipelineStatusBar";
 import { ActiveThreatsList } from "@/components/dashboard/ActiveThreatsList";
 import { AIReasoningStream } from "@/components/dashboard/AIReasoningStream";
-import { NetworkTopology } from "@/components/visualization/NetworkTopology";
 import { TelemetryPacketFeed } from "@/components/dashboard/TelemetryPacketFeed";
-import { PipelineStatusBar } from "@/components/dashboard/PipelineStatusBar";
+import { NetworkTopology } from "@/components/visualization/NetworkTopology";
+import { ThreatScoreChart } from "@/components/visualization/ThreatScoreChart";
+import { NetworkTrafficChart } from "@/components/visualization/NetworkTrafficChart";
+import { threatTone } from "@/components/app-shell/SidebarNav";
 
 export default function DashboardPage() {
-  const { globalThreatScore, activeThreats, systemHealth } = useSimulationStore();
+  const globalThreatScore = useSimulationStore((s) => s.globalThreatScore);
+  const activeThreats = useSimulationStore((s) => s.activeThreats);
+  const traffic = useSimulationStore((s) => s.systemHealth.networkTraffic);
+  const confidence = useSimulationStore((s) => s.aiReasoningState.confidence);
+  const events = useSimulationStore((s) => s.telemetryEvents.length);
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
-      {/* Dashboard Header */}
-      <header className="flex-shrink-0">
-        <h1 className="text-3xl font-outfit font-bold text-white mb-1 tracking-wide">COMMAND CENTER</h1>
-        <p className="text-text-secondary font-mono text-xs uppercase tracking-widest">Autonomous Deception Warfare System // Active Battlefield</p>
-      </header>
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <PageHeader title="Command center" description="Live view of detection, deception, and response." />
 
-      {/* Phase 3: Live Pipeline Status Bar */}
-      <div className="flex-shrink-0">
-        <PipelineStatusBar />
-      </div>
+      <PipelineStatusBar />
 
-      {/* Top Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
-        <CyberPanel variant="interactive" glowColor={globalThreatScore > 75 ? 'red' : 'cyan'} className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-text-muted font-mono text-xs uppercase">
-            <ShieldAlert className="w-4 h-4" />
-            Global Threat Level
-          </div>
-          <div className="text-4xl font-bold font-outfit text-white flex items-end gap-2">
-            {globalThreatScore}<span className="text-lg text-text-secondary font-mono pb-1">/100</span>
-          </div>
-          <div className="h-16 mt-2 -mx-4 -mb-4 opacity-70">
-            <ThreatScoreChart />
-          </div>
-        </CyberPanel>
+      <Panel className="grid grid-cols-2 divide-y md:divide-y-0 lg:grid-cols-4 lg:divide-x">
+        <StatBlock label="Threat score" value={globalThreatScore} unit="/100" tone={threatTone(globalThreatScore)}>
+          <ThreatScoreChart />
+        </StatBlock>
+        <StatBlock
+          label="Active incidents"
+          value={activeThreats.length}
+          tone={activeThreats.length > 0 ? "danger" : "default"}
+          hint={activeThreats.length === 0 ? "Nothing open" : `${activeThreats.filter((t) => t.severity === "CRITICAL").length} critical`}
+        />
+        <StatBlock label="Network traffic" value={Math.round(traffic)} unit="Mbps">
+          <NetworkTrafficChart />
+        </StatBlock>
+        <StatBlock label="AI confidence" value={confidence} unit="%" hint="Latest reasoning pass" />
+      </Panel>
 
-        <CyberPanel variant="interactive" glowColor="magenta" className="flex flex-col gap-2 relative overflow-hidden">
-          <div className="flex items-center gap-2 text-text-muted font-mono text-xs uppercase">
-            <Activity className="w-4 h-4" />
-            Active Incidents
-          </div>
-          <div className="text-4xl font-bold font-outfit text-white">
-            {activeThreats.length}
-          </div>
-          {activeThreats.length > 0 && (
-            <div className="absolute top-0 right-0 w-16 h-16 bg-neon-magenta/20 blur-xl rounded-full" />
-          )}
-        </CyberPanel>
-
-        <CyberPanel variant="interactive" glowColor="cyan" className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-text-muted font-mono text-xs uppercase">
-            <Server className="w-4 h-4" />
-            Network Traffic
-          </div>
-          <div className="text-4xl font-bold font-outfit text-white flex items-end gap-2">
-            {Math.round(systemHealth.networkTraffic)} <span className="text-lg text-text-secondary font-mono pb-1">Mbps</span>
-          </div>
-          <div className="h-16 mt-2 -mx-4 -mb-4 opacity-50">
-            <NetworkTrafficChart />
-          </div>
-        </CyberPanel>
-
-        <CyberPanel variant="interactive" glowColor="purple" className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-text-muted font-mono text-xs uppercase">
-            <Zap className="w-4 h-4" />
-            AI Confidence
-          </div>
-          <div className="text-4xl font-bold font-outfit text-white flex items-end gap-2">
-            94.2<span className="text-lg text-text-secondary font-mono pb-1">%</span>
-          </div>
-        </CyberPanel>
-      </div>
-
-      {/* Main Content Grid — 3 columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
-
-        {/* Col 1–2: Topology + Telemetry Feed */}
-        <div className="lg:col-span-2 flex flex-col gap-4 min-w-0 min-h-0">
-          {/* Network Topology */}
-          <CyberPanel className="flex-1 min-h-[260px] p-0 overflow-hidden" scanline glowColor="cyan">
-            <div className="absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-gradient-to-b from-black/80 to-transparent z-20 pointer-events-none">
-              <h2 className="text-sm font-mono text-neon-cyan uppercase">Network Topology // Deception Map</h2>
-              <span className="text-[10px] font-mono text-neon-cyan/70 bg-neon-cyan/10 px-2 py-1 rounded-sm border border-neon-cyan/30">LIVE FEED</span>
-            </div>
-            <NetworkTopology />
-          </CyberPanel>
-
-          {/* Phase 3: Telemetry Packet Feed */}
-          <CyberPanel className="h-[200px] p-0 overflow-hidden" glowColor="none">
-            <TelemetryPacketFeed />
-          </CyberPanel>
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-3">
+        <div className="flex min-h-0 flex-col gap-4 lg:col-span-2">
+          <Panel className="min-h-[300px] flex-1">
+            <PanelHeader title="Deception map" description="Production on the left, twins on the right" actions={<StatusBadge label="Live" tone="success" live />} />
+            <PanelBody padded={false}>
+              <NetworkTopology />
+            </PanelBody>
+          </Panel>
+          <Panel className="h-56 shrink-0">
+            <PanelHeader title="Telemetry" description={`${events} events in buffer`} />
+            <PanelBody padded={false}>
+              <TelemetryPacketFeed />
+            </PanelBody>
+          </Panel>
         </div>
 
-        {/* Col 3: Threats + AI Stream */}
-        <div className="flex flex-col gap-4 min-w-0 min-h-0">
-          <CyberPanel className="flex-[2]" glowColor="none">
-            <h2 className="text-sm font-mono text-white uppercase mb-4 border-b border-white/10 pb-2 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-neon-magenta" /> 
-              Active Threats
-            </h2>
-            <div className="h-[calc(100%-40px)]">
-               <ActiveThreatsList />
-            </div>
-          </CyberPanel>
-
-          <CyberPanel className="flex-[3] p-0 overflow-hidden" glowColor="magenta">
-            <AIReasoningStream />
-          </CyberPanel>
+        <div className="flex min-h-0 flex-col gap-4">
+          <Panel className="min-h-[220px] flex-[2]">
+            <PanelHeader title="Active threats" actions={<span className="font-mono text-xs text-ink-subtle">{activeThreats.length}</span>} />
+            <PanelBody padded={false} scroll>
+              <ActiveThreatsList />
+            </PanelBody>
+          </Panel>
+          <Panel className="min-h-[260px] flex-[3]">
+            <PanelHeader title="AI reasoning" />
+            <PanelBody padded={false}>
+              <AIReasoningStream />
+            </PanelBody>
+          </Panel>
         </div>
       </div>
     </div>

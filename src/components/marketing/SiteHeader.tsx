@@ -1,83 +1,93 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Shield } from 'lucide-react';
-import { CyberButton } from '@/components/core/CyberButton';
-import { Show, SignInButton, UserButton } from '@clerk/nextjs';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { List } from "@phosphor-icons/react";
+import { Show, SignInButton, UserButton } from "@clerk/nextjs";
+import { BrandMark } from "@/components/shared/BrandMark";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+
+const NAV = [
+  { label: "Architecture", href: "/architecture" },
+  { label: "Capabilities", href: "/#capabilities" },
+  { label: "Sandbox", href: "/sandbox" },
+  { label: "Pricing", href: "/pricing" },
+];
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
-  const navLinks = [
-    { name: 'Architecture', href: '/architecture' },
-    { name: 'Capabilities', href: '/#features' },
-    { name: 'Sandbox', href: '/sandbox' },
-    { name: 'Pricing', href: '/pricing' },
-  ];
+  const links = (onClick?: () => void, vertical = false) =>
+    NAV.map((item) => {
+      const active = pathname === item.href;
+      return (
+        <Link
+          key={item.href}
+          href={item.href}
+          onClick={onClick}
+          aria-current={active ? "page" : undefined}
+          className={cn(
+            "rounded-control text-sm transition-colors duration-150 hover:text-ink",
+            vertical ? "px-2 py-2" : "px-1 py-1",
+            active ? "text-ink" : "text-ink-muted",
+          )}
+        >
+          {item.label}
+        </Link>
+      );
+    });
 
   return (
-    <header className="fixed top-0 inset-x-0 h-16 md:h-20 z-50 glass-panel border-b border-white/5 bg-cyber-darker/60 flex items-center px-6 md:px-12 backdrop-blur-xl">
-      <div className="w-full max-w-[1400px] mx-auto flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative flex items-center justify-center w-8 h-8">
-            <Shield className="w-6 h-6 text-neon-cyan relative z-10 transition-transform duration-500 group-hover:scale-110" />
-            <div className="absolute inset-0 border border-neon-cyan/40 rounded-full scale-125 transition-transform duration-700 group-hover:rotate-180" />
-          </div>
-          <span className="font-outfit font-bold text-lg tracking-widest text-white uppercase">
-            Aetheris<span className="text-neon-cyan">.ai</span>
-          </span>
+    <header className="sticky top-0 z-[var(--z-sticky)] h-16 border-b bg-bg/85 backdrop-blur">
+      <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between gap-6 px-6">
+        <Link href="/" className="rounded-control" aria-label="Aetheris home">
+          <BrandMark size={22} />
         </Link>
-        
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link 
-                key={link.name}
-                href={link.href} 
-                className={`text-sm font-mono uppercase tracking-widest transition-all duration-300 relative ${
-                  isActive 
-                    ? 'text-neon-cyan drop-shadow-[0_0_8px_rgba(0,243,255,0.8)]' 
-                    : 'text-text-muted hover:text-white'
-                }`}
-              >
-                {link.name}
-                {isActive && (
-                  <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-neon-cyan rounded-full shadow-[0_0_10px_rgba(0,243,255,0.8)]" />
-                )}
-              </Link>
-            );
-          })}
+
+        <nav aria-label="Site" className="hidden items-center gap-6 md:flex">
+          {links()}
         </nav>
-        
-        <div className="flex items-center gap-4">
+
+        <div className="flex items-center gap-2">
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <CyberButton variant="ghost" className="hidden md:flex hover:text-white">
-                Sign In
-              </CyberButton>
+              <Button variant="ghost" className="hidden md:inline-flex">
+                Sign in
+              </Button>
             </SignInButton>
             <SignInButton mode="modal">
-              <CyberButton variant="primary">
-                Launch SOC
-              </CyberButton>
+              <Button>Open dashboard</Button>
             </SignInButton>
           </Show>
-          
           <Show when="signed-in">
-            <Link href="/dashboard">
-              <CyberButton variant="primary" className="hidden md:flex">
-                Dashboard
-              </CyberButton>
-            </Link>
-            <div className="ml-2 mt-1">
-              <UserButton appearance={{ elements: { avatarBox: "w-10 h-10 border border-neon-cyan/30 rounded-xl" } }} />
-            </div>
+            <Button render={<Link href="/dashboard" />}>Open dashboard</Button>
+            <UserButton appearance={{ elements: { avatarBox: "size-8 rounded-control" } }} />
           </Show>
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
+            <List />
+          </Button>
         </div>
       </div>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="right" className="w-64 p-6 sm:max-w-64">
+          <SheetTitle className="sr-only">Menu</SheetTitle>
+          <nav aria-label="Site" className="mt-8 flex flex-col">
+            {links(() => setOpen(false), true)}
+            <Show when="signed-out">
+              <SignInButton mode="modal">
+                <Button variant="secondary" className="mt-4">
+                  Sign in
+                </Button>
+              </SignInButton>
+            </Show>
+          </nav>
+        </SheetContent>
+      </Sheet>
     </header>
   );
 }

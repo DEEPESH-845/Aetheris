@@ -1,26 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { UserPlus, Trash2, Shield } from "lucide-react";
+import { UserPlus, Trash, Users } from "@phosphor-icons/react";
 import { useOrg } from "@/hooks/useOrg";
 import { api } from "@/utils/trpc";
-import { CyberButton } from "@/components/core/CyberButton";
-import { CyberPanel } from "@/components/core/CyberPanel";
-import { StatusBadge } from "@/components/core/StatusBadge";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { Panel, PanelBody, PanelHeader } from "@/components/shared/Panel";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-const ROLE_COLORS: Record<string, string> = {
-  OWNER: "text-yellow-400",
-  ADMIN: "text-neon-magenta",
-  MEMBER: "text-neon-cyan",
-  VIEWER: "text-text-secondary",
+type Role = "ADMIN" | "MEMBER" | "VIEWER";
+const ROLES: Role[] = ["ADMIN", "MEMBER", "VIEWER"];
+
+const roleVariant: Record<string, "accent" | "default" | "outline"> = {
+  OWNER: "accent",
+  ADMIN: "accent",
+  MEMBER: "default",
+  VIEWER: "outline",
 };
 
 export default function MembersPage() {
   const { org } = useOrg();
   const [showInvite, setShowInvite] = useState(false);
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"ADMIN" | "MEMBER" | "VIEWER">("MEMBER");
+  const [role, setRole] = useState<Role>("MEMBER");
+  const [pendingRemoval, setPendingRemoval] = useState<{ id: string; email: string } | null>(null);
 
   const listMembers = api.org.listMembers.useQuery();
   const inviteMember = api.org.inviteMember.useMutation({
@@ -30,105 +41,177 @@ export default function MembersPage() {
       setEmail("");
     },
   });
+  const removeMember = api.org.removeMember.useMutation({
+    onSuccess: () => {
+      listMembers.refetch();
+      setPendingRemoval(null);
+    },
+  });
 
   const members = listMembers.data ?? [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-outfit text-2xl font-bold text-white">Team Members</h1>
-          <p className="text-text-secondary text-sm mt-1">
-            {members.length} member{members.length !== 1 ? "s" : ""} in {org?.name}
-          </p>
-        </div>
-        <CyberButton onClick={() => setShowInvite(true)} variant="primary" size="sm">
-          <UserPlus className="w-4 h-4 mr-2" />
-          Invite Member
-        </CyberButton>
-      </div>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title="Team members"
+        description={org ? `${members.length} ${members.length === 1 ? "member" : "members"} in ${org.name}` : "People with access to this organization"}
+        actions={
+          <Button onClick={() => setShowInvite((v) => !v)} aria-expanded={showInvite}>
+            <UserPlus aria-hidden="true" />
+            Invite member
+          </Button>
+        }
+      />
 
-      {/* Invite Form */}
       {showInvite && (
-        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
-          <CyberPanel className="p-6">
-            <h3 className="font-outfit font-bold text-white mb-4">Invite Team Member</h3>
-            <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <label className="text-xs font-mono text-text-muted mb-1 block">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-sm px-3 py-2 text-white text-sm font-mono focus:border-neon-cyan/50 focus:outline-none"
-                  placeholder="colleague@company.com"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-mono text-text-muted mb-1 block">Role</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as typeof role)}
-                  className="bg-black/40 border border-white/10 rounded-sm px-3 py-2 text-white text-sm font-mono focus:border-neon-cyan/50 focus:outline-none"
-                >
-                  <option value="ADMIN">Admin</option>
-                  <option value="MEMBER">Member</option>
-                  <option value="VIEWER">Viewer</option>
-                </select>
-              </div>
-              <CyberButton
-                onClick={() => inviteMember.mutate({ email, role })}
-                variant="primary"
-                size="sm"
-                disabled={!email}
-              >
-                Send Invite
-              </CyberButton>
-              <CyberButton onClick={() => setShowInvite(false)} variant="ghost" size="sm">
-                Cancel
-              </CyberButton>
+        <Panel>
+          <PanelHeader title="Invite a team member" />
+          <form
+            className="flex flex-col gap-4 p-4 md:flex-row md:items-end"
+            onSubmit={(e) => {
+              e.preventDefault();
+              inviteMember.mutate({ email, role });
+            }}
+          >
+            <div className="flex flex-1 flex-col gap-1.5">
+              <Label htmlFor="invite-email">Email</Label>
+              <Input
+                id="invite-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                spellCheck={false}
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="colleague@company.com"
+                aria-invalid={inviteMember.isError || undefined}
+              />
+              {inviteMember.isError && (
+                <p className="text-xs text-danger" role="alert">
+                  {inviteMember.error.message}
+                </p>
+              )}
             </div>
-          </CyberPanel>
-        </motion.div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="invite-role">Role</Label>
+              <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+                <SelectTrigger id="invite-role" className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((r) => (
+                    <SelectItem key={r} value={r} className="capitalize">
+                      {r.toLowerCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={inviteMember.isPending}>
+                {inviteMember.isPending ? "Sending…" : "Send invite"}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setShowInvite(false)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Panel>
       )}
 
-      {/* Members List */}
-      <div className="space-y-2">
-        {members.map((membership, i) => (
-          <motion.div
-            key={membership.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            <CyberPanel className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 flex items-center justify-center">
-                    <span className="text-sm font-mono text-neon-cyan">
-                      {membership.user.name?.charAt(0) ?? membership.user.email.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-white font-medium">{membership.user.name ?? "Unnamed"}</p>
-                    <p className="text-text-secondary text-xs font-mono">{membership.user.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-xs font-mono ${ROLE_COLORS[membership.role] ?? "text-text-secondary"}`}>
-                    {membership.role}
-                  </span>
-                  {membership.role !== "OWNER" && (
-                    <button className="p-1 text-text-muted hover:text-neon-red transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </CyberPanel>
-          </motion.div>
-        ))}
-      </div>
+      <Panel>
+        <PanelBody padded={false}>
+          {listMembers.isLoading ? (
+            <div className="flex flex-col gap-3 p-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-9" />
+              ))}
+            </div>
+          ) : listMembers.isError ? (
+            <p className="p-4 text-sm text-danger" role="alert">
+              Could not load members: {listMembers.error.message}
+            </p>
+          ) : members.length === 0 ? (
+            <EmptyState icon={Users} title="No members yet" hint="Invite a colleague to give them access." />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((m) => {
+                  const initial = (m.user.name ?? m.user.email).charAt(0).toUpperCase();
+                  return (
+                    <TableRow key={m.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <span className="flex size-8 items-center justify-center rounded-control bg-surface-2 text-sm font-medium text-ink-muted" aria-hidden="true">
+                            {initial}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="truncate text-sm text-ink">{m.user.name ?? "Unnamed"}</div>
+                            <div className="truncate font-mono text-xs text-ink-muted">{m.user.email}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={roleVariant[m.role] ?? "default"} className="capitalize">
+                          {m.role.toLowerCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {m.role !== "OWNER" && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Remove ${m.user.email}`}
+                            onClick={() => setPendingRemoval({ id: m.id, email: m.user.email })}
+                          >
+                            <Trash />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </PanelBody>
+      </Panel>
+
+      <Dialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove member</DialogTitle>
+            <DialogDescription>
+              {pendingRemoval?.email} will lose access to this organization immediately.
+            </DialogDescription>
+          </DialogHeader>
+          {removeMember.isError && (
+            <p className="text-sm text-danger" role="alert">
+              {removeMember.error.message}
+            </p>
+          )}
+          <DialogFooter showCloseButton={false}>
+            <Button variant="ghost" onClick={() => setPendingRemoval(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              disabled={removeMember.isPending}
+              onClick={() => pendingRemoval && removeMember.mutate({ membershipId: pendingRemoval.id })}
+            >
+              {removeMember.isPending ? "Removing…" : "Remove member"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
