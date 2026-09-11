@@ -23,7 +23,7 @@ export default function SandboxMarketingPage() {
     <>
       <section className="mx-auto max-w-[1200px] px-6 pt-20 pb-16">
         <div className="max-w-[60ch]">
-          <h1 className="text-display text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.02em] text-ink">
+          <h1 className="text-display text-[clamp(2.25rem,4.4vw,3.25rem)] leading-[1.05] font-semibold tracking-[-0.02em] text-ink">
             Test the engine against real attack patterns
           </h1>
           <p className="mt-6 text-[17px] leading-relaxed text-ink-muted">
