@@ -462,8 +462,11 @@ export function useSimulationEngine() {
     const connect = async () => {
       if (!isSimulationRunning || wsRef.current) return;
 
+      // No backend configured: stay on the local generator instead of retrying a dead socket every 3s.
+      const wsUrl = process.env.NEXT_PUBLIC_BACKEND_WS_URL;
+      if (!wsUrl) return;
+
       const token = await getToken();
-      const wsUrl = process.env.NEXT_PUBLIC_BACKEND_WS_URL || 'ws://localhost:8000/ws';
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 

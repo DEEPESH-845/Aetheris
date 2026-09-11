@@ -26,7 +26,7 @@ export function NetworkTrafficChart() {
         <Tooltip
           cursor={{ fill: colors.border }}
           {...tooltipStyle(colors)}
-          formatter={(v) => [`${v} Mbps`, "Traffic"]}
+          formatter={(v) => [`${v}\u00a0Mbps`, "Traffic"]}
         />
         <Bar dataKey="mbps" fill={colors.muted} fillOpacity={0.55} isAnimationActive={false} radius={[1, 1, 0, 0]} />
       </BarChart>

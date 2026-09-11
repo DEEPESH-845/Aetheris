@@ -64,7 +64,7 @@ export function LivePreview() {
 
   return (
     <div className="flex flex-col gap-3">
-      <Panel className="h-[300px] sm:h-[340px]">
+      <Panel className="h-[320px] sm:h-[380px]">
         <PanelHeader title="Deception map" actions={<StatusBadge label="Live" tone="success" live />} />
         <PanelBody padded={false}>
           <NetworkTopology interactive={false} />

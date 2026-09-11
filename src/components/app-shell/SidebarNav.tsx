@@ -87,10 +87,22 @@ export function SidebarNav({ collapsed = false, onToggle, onNavigate, className 
         className,
       )}
     >
-      <div className={cn("flex h-[52px] shrink-0 items-center border-b", collapsed ? "justify-center" : "px-4")}>
-        <Link href="/dashboard" className="rounded-control focus-visible:outline-2" aria-label="Aetheris home">
-          <BrandMark wordmark={!collapsed} />
-        </Link>
+      <div className={cn("flex h-[52px] shrink-0 items-center border-b", collapsed ? "justify-center" : "justify-between pr-2 pl-4")}>
+        {!collapsed && (
+          <Link href="/dashboard" className="rounded-control focus-visible:outline-2" aria-label="Aetheris home">
+            <BrandMark />
+          </Link>
+        )}
+        {onToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="flex size-8 items-center justify-center rounded-control text-ink-subtle transition-[background-color,color] hover:bg-surface-2 hover:text-ink"
+          >
+            <SidebarSimple size={16} aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       <nav aria-label="Primary" className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-2 py-3">
@@ -138,9 +150,9 @@ export function SidebarNav({ collapsed = false, onToggle, onNavigate, className 
         ))}
       </nav>
 
-      <div className={cn("shrink-0 border-t", collapsed ? "p-2" : "p-3")}>
-        {!collapsed && (
-          <div className="mb-3 space-y-1.5">
+      {!collapsed && (
+        <div className="shrink-0 border-t p-3">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-ink-muted">Threat score</span>
               <span
@@ -163,22 +175,8 @@ export function SidebarNav({ collapsed = false, onToggle, onNavigate, className 
               />
             </div>
           </div>
-        )}
-        {onToggle && (
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={cn(
-              "flex h-8 w-full items-center gap-2 rounded-control px-2 text-sm text-ink-muted transition-[background-color,color] hover:bg-surface-2 hover:text-ink",
-              collapsed && "justify-center px-0",
-            )}
-          >
-            <SidebarSimple size={16} aria-hidden="true" />
-            {!collapsed && <span>Collapse</span>}
-          </button>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   );
 }

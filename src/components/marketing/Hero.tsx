@@ -20,16 +20,18 @@ export function Hero() {
   return (
     <section className="mx-auto grid max-w-[1200px] items-center gap-12 px-6 pt-16 pb-20 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-12 lg:gap-10 lg:pt-8">
       <motion.div
-        className="flex flex-col items-start gap-6 lg:col-span-6"
+        className="flex flex-col items-start gap-6 lg:col-span-7"
         variants={container}
         initial={reduce ? false : "hidden"}
         animate="show"
       >
         <motion.h1
           variants={item}
-          className="text-display text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.02em] text-ink"
+          className="text-display text-[clamp(2.25rem,4.4vw,3.25rem)] leading-[1.05] font-semibold tracking-[-0.02em] text-ink"
         >
-          Attackers break in. They never reach production.
+          Attackers break in.
+          <br />
+          They never reach production.
         </motion.h1>
         <motion.p variants={item} className="max-w-[52ch] text-[17px] leading-relaxed text-ink-muted">
           Aetheris detects the intrusion, reroutes the session into an AI-built twin, and captures the tooling while it happens.
@@ -46,7 +48,7 @@ export function Hero() {
       </motion.div>
 
       <motion.div
-        className="lg:col-span-6"
+        className="lg:col-span-5"
         initial={reduce ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}

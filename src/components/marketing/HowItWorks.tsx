@@ -1,7 +1,3 @@
-"use client";
-
-import { motion, useReducedMotion } from "framer-motion";
-
 const STEPS = [
   {
     title: "Detect",
@@ -22,7 +18,6 @@ const STEPS = [
 ];
 
 export function HowItWorks() {
-  const reduce = useReducedMotion();
   return (
     <section className="mx-auto grid max-w-[1200px] gap-10 px-6 py-[clamp(4rem,8vw,7rem)] lg:grid-cols-12">
       <div className="lg:col-span-5">
@@ -37,20 +32,13 @@ export function HowItWorks() {
       </div>
       <ol className="lg:col-span-7">
         {STEPS.map((step, i) => (
-          <motion.li
-            key={step.title}
-            initial={reduce ? false : { opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.5, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="grid grid-cols-[3rem_1fr] gap-4 border-t py-8 last:border-b"
-          >
+          <li key={step.title} className="grid grid-cols-[3rem_1fr] gap-4 border-t py-8 last:border-b">
             <span className="font-mono text-sm text-ink-subtle">0{i + 1}</span>
             <div>
               <h3 className="text-lg font-medium text-ink">{step.title}</h3>
               <p className="mt-2 max-w-[60ch] text-base text-ink-muted">{step.body}</p>
             </div>
-          </motion.li>
+          </li>
         ))}
       </ol>
     </section>

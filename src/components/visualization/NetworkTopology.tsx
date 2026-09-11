@@ -16,12 +16,12 @@ const nodeIcons: Record<NetworkNode["type"], Icon> = {
 // Fixed layout: production on the left, deception twins grouped on the right.
 const nodePositions: Record<string, { x: number; y: number }> = {
   "fw-1": { x: 12, y: 50 },
-  "web-cluster-1": { x: 32, y: 28 },
-  "internal-api": { x: 32, y: 72 },
-  "db-main": { x: 52, y: 28 },
-  "cloud-storage": { x: 52, y: 72 },
-  "honey-api-proxy": { x: 74, y: 58 },
-  "honey-db-1": { x: 90, y: 80 },
+  "web-cluster-1": { x: 31, y: 26 },
+  "internal-api": { x: 31, y: 72 },
+  "db-main": { x: 50, y: 26 },
+  "cloud-storage": { x: 50, y: 72 },
+  "honey-api-proxy": { x: 70, y: 50 },
+  "honey-db-1": { x: 87, y: 74 },
 };
 
 const statusStyles: Record<NetworkNode["status"], { box: string; label: string }> = {
@@ -62,7 +62,8 @@ export function NetworkTopology({ searchQuery = "", interactive = true }: Networ
   }, [nodes, networkNodes, activeThreats]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden" role="img" aria-label="Network topology map">
+    <div className="h-full w-full contain-inline-size overflow-x-auto overflow-y-hidden" role="img" aria-label="Network topology map">
+      <div className="relative h-full min-w-[520px]">
       <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
         {edges.map((edge) => {
           const a = nodePositions[edge.from];
@@ -98,7 +99,7 @@ export function NetworkTopology({ searchQuery = "", interactive = true }: Networ
         return (
           <div
             key={node.id}
-            className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1.5"
+            className="absolute flex w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1.5"
             style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
           >
             <div
@@ -113,8 +114,8 @@ export function NetworkTopology({ searchQuery = "", interactive = true }: Networ
             >
               <NodeIcon size={20} aria-hidden="true" />
             </div>
-            <div className="text-center">
-              <div className="whitespace-nowrap text-xs text-ink">{node.label}</div>
+            <div className="rounded-badge bg-surface px-1 text-center">
+              <div className="max-w-[6.5rem] text-xs leading-tight text-ink">{node.label}</div>
               <div className="font-mono text-[11px] text-ink-subtle">
                 {node.status === "healthy" ? `CPU ${node.cpuUsage}%` : style.label}
               </div>
@@ -122,6 +123,7 @@ export function NetworkTopology({ searchQuery = "", interactive = true }: Networ
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

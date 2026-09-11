@@ -35,8 +35,8 @@ function TwinCard({ twin }: { twin: SandboxTwin }) {
       <dl className="grid grid-cols-4 divide-x border-b text-xs">
         {[
           ["vCPU", twin.vCpus],
-          ["RAM", `${twin.ramGb} GB`],
-          ["Disk", `${twin.diskGb} GB`],
+          ["RAM", `${twin.ramGb}\u00a0GB`],
+          ["Disk", `${twin.diskGb}\u00a0GB`],
           ["IP", twin.ipAddress],
         ].map(([k, v]) => (
           <div key={String(k)} className="px-3 py-2">

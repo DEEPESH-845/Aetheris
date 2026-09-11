@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MagnifyingGlass, ShieldCheck } from "@phosphor-icons/react";
 import { useSimulationStore, type Threat, type ThreatLevel } from "@/store/useSimulationStore";
@@ -29,6 +29,7 @@ function ThreatMonitor() {
   const params = useSearchParams();
   const severity = (params.get("severity") ?? "ALL").toUpperCase();
   const query = params.get("q") ?? "";
+  const [search, setSearch] = useState(query);
 
   const setParam = useCallback(
     (key: string, value: string) => {
@@ -74,8 +75,11 @@ function ThreatMonitor() {
             placeholder="Search by IP, node, or type…"
             autoComplete="off"
             spellCheck={false}
-            defaultValue={query}
-            onChange={(e) => setParam("q", e.target.value)}
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setParam("q", e.target.value);
+            }}
             className="pl-8"
           />
         </div>

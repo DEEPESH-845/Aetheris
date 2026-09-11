@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Pause, Play, ShieldSlash } from "@phosphor-icons/react";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -44,8 +45,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange} title="Command palette" description="Jump to a page or run an action">
-      <CommandInput placeholder="Go to page or run an action…" />
-      <CommandList>
+      <Command>
+        <CommandInput placeholder="Go to page or run an action…" />
+        <CommandList>
         <CommandEmpty>No results.</CommandEmpty>
         {NAV_GROUPS.map((group) => (
           <CommandGroup key={group.label} heading={group.label}>
@@ -70,7 +72,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {isRunning ? "Halt simulation" : "Resume simulation"}
           </CommandItem>
         </CommandGroup>
-      </CommandList>
+        </CommandList>
+      </Command>
     </CommandDialog>
   );
 }

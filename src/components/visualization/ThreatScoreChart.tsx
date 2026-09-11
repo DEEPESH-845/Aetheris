@@ -32,6 +32,7 @@ export function ThreatScoreChart({ showAxis = false }: ThreatScoreChartProps) {
             <stop offset="100%" stopColor={stroke} stopOpacity={0} />
           </linearGradient>
         </defs>
+        {!showAxis && <YAxis domain={[0, 100]} hide />}
         {showAxis && (
           <YAxis
             domain={[0, 100]}
