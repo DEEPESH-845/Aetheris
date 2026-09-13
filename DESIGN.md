@@ -117,9 +117,31 @@ Icons: Phosphor (`@phosphor-icons/react`), weight `regular` at 16px in UI, `duot
 
 Product: 150ms hover, 200ms state change, 250ms panel/drawer. Easing `cubic-bezier(0.16, 1, 0.3, 1)`. Animate `transform`, `opacity`, `background-color`, `border-color` only; never `transition: all`. No page-load choreography in the dashboard; content renders immediately, live rows fade in over 200ms.
 
-Marketing: one hero reveal (headline, body, actions, preview; 600ms, 60ms stagger). `whileInView` fade-up on at most three sections, `once: true`. No infinite loops except the logo marquee (paused under reduced motion, max one per page).
+Marketing (landing page): motion is the product story, driven by GSAP and one three.js scene.
+The scene ("the lure") is a fixed WebGL layer behind the page.
+Every element in it stands for one thing in the product, and each appears only in the stage where that thing acts:
+
+- Production lattice (graphite cells, solid faces): the customer's cluster. First thing on screen when the scene fades in; recedes into fog while the twin is live.
+- Perimeter hull and scan plane (hairline box, translucent amber plane): the sensors. The plane sweeps slowly in idle, fast during Detect, and the hull flashes danger on impact.
+- Packet (amber point with trail): the attacker. Circles the hull in reconnaissance, lands on one cell, is bent into the twin, works inside it, fades as it is captured.
+- Redirect path (dashed amber route): the kernel socket rewrite. Drawn ahead of the packet during Redirect, dims once the session is inside.
+- Twin lattice (amber edges, hollow faces): the deception host. A facade, so no solid faces. Assembles cell by cell in Redirect, dissolves in Extract, and is rebuilt as the sandbox lab behind the closing call to action.
+- Extraction points and profile node (amber points, wireframe octahedron): indicators lifting out of the twin into the attacker profile.
+- Labels (mono 11px, hairline rule): name the object they are anchored to: production, twin, attacker profile.
+
+It is the only decorative 3D on the site; other marketing pages stay flat.
+
+- Hero: the product alone, no scene. Headline lines rise out of line masks (1.1s, 90ms stagger, `expo.out`), body and actions follow, the live preview settles from a 14 degree tilt to 4 degrees and leans at most 3 degrees toward the pointer. The scene layer is hidden and paused while the hero is in view and fades in over the hero's second half, fully on when the story pins.
+- How it works: pinned for 400vh; scroll scrubs the scene through detect, redirect, deceive, extract and crossfades the step copy at each quarter. Progress hairlines under the steps fill in amber.
+- Capabilities and CTA: one fade-up on enter, `once`. Cards tilt at most 4 degrees toward the pointer on hover.
+- Scroll is inertial (ScrollSmoother, 1.1s) on the marketing site only.
+- Scene rules: colors are the tokens only (`--surface-2` faces, `--border-strong` edges, amber for the twin and packet, danger for the compromised cell). No bloom, glow, scanlines, or glass. Depth from fog and edge contrast. The canvas stops rendering while an opaque section covers it.
+- Logo marquee is the only infinite loop besides the scene's idle packet (paused under reduced motion).
+
+Marketing (other pages): one hero reveal (headline, body, actions; 600ms, 60ms stagger) and at most three `whileInView` fade-ups, `once: true`.
 
 `prefers-reduced-motion: reduce` collapses every animation to instant or crossfade.
+On the landing page it also disables the smoother and the pin, renders the steps as a static list, and leaves the scene on one still frame.
 
 ## Imagery
 

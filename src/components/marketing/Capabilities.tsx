@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { Brain, Cube, ShieldSlash, Flask } from "@phosphor-icons/react";
+import { EASE, gsap, useGSAP } from "@/lib/gsap";
 import { FeedList } from "@/components/shared/FeedList";
 import { NetworkTopology } from "@/components/visualization/NetworkTopology";
 import { cn } from "@/lib/utils";
@@ -15,7 +17,7 @@ const SESSION = [
 
 function Block({ icon: IconComponent, title, body, children, className = "" }: { icon: typeof Brain; title: string; body: string; children?: React.ReactNode; className?: string }) {
   return (
-    <div className={`flex min-w-0 flex-col rounded-panel border bg-surface ${className}`}>
+    <div data-card className={`flex min-w-0 flex-col rounded-panel border bg-surface will-change-transform ${className}`}>
       <div className="flex flex-col gap-3 p-7">
         <IconComponent size={24} weight="duotone" className="text-accent" aria-hidden="true" />
         <h3 className="text-lg font-medium text-ink">{title}</h3>
@@ -27,10 +29,63 @@ function Block({ icon: IconComponent, title, body, children, className = "" }: {
 }
 
 export function Capabilities() {
+  const section = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const cards = gsap.utils.toArray<HTMLElement>("[data-card]");
+        gsap.from("[data-cap-title]", {
+          y: 24,
+          autoAlpha: 0,
+          duration: 1,
+          ease: EASE,
+          scrollTrigger: { trigger: section.current, start: "top 75%", once: true },
+        });
+        gsap.from(cards, {
+          y: 40,
+          autoAlpha: 0,
+          duration: 1.1,
+          stagger: 0.1,
+          ease: EASE,
+          scrollTrigger: { trigger: cards[0], start: "top 80%", once: true },
+        });
+      });
+      // Tilt toward the pointer, at most four degrees, desktop only.
+      mm.add("(prefers-reduced-motion: no-preference) and (hover: hover) and (min-width: 768px)", () => {
+        const cleanups = gsap.utils.toArray<HTMLElement>("[data-card]").map((card) => {
+          gsap.set(card, { transformPerspective: 1200 });
+          const rx = gsap.quickTo(card, "rotationX", { duration: 0.5, ease: "power3" });
+          const ry = gsap.quickTo(card, "rotationY", { duration: 0.5, ease: "power3" });
+          const onMove = (e: PointerEvent) => {
+            const r = card.getBoundingClientRect();
+            const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+            const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
+            ry(nx * 4);
+            rx(-ny * 4);
+          };
+          const onLeave = () => {
+            ry(0);
+            rx(0);
+          };
+          card.addEventListener("pointermove", onMove);
+          card.addEventListener("pointerleave", onLeave);
+          return () => {
+            card.removeEventListener("pointermove", onMove);
+            card.removeEventListener("pointerleave", onLeave);
+          };
+        });
+        return () => cleanups.forEach((fn) => fn());
+      });
+    },
+    { scope: section },
+  );
+
   return (
-    <section id="capabilities" className="scroll-mt-20 border-t bg-surface/40">
+    <section ref={section} id="capabilities" className="scroll-mt-20 border-t bg-surface/40">
       <div className="mx-auto max-w-[1200px] px-6 py-[clamp(4rem,8vw,7rem)]">
-        <h2 className="text-display max-w-[24ch] text-[clamp(1.75rem,3.2vw,2.5rem)] leading-[1.1] font-semibold tracking-[-0.015em] text-ink">
+        <h2 data-cap-title className="text-display max-w-[24ch] text-[clamp(1.75rem,3.2vw,2.5rem)] leading-[1.1] font-semibold tracking-[-0.015em] text-ink">
           Built to act while the analyst is still reading the alert
         </h2>
 
