@@ -42,7 +42,7 @@ export function SiteHeader() {
     });
 
   return (
-    <header className="sticky top-0 z-[var(--z-sticky)] h-16 border-b bg-bg/85 backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-[var(--z-sticky)] h-16 border-b bg-bg/85 backdrop-blur">
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between gap-6 px-6">
         <Link href="/" className="rounded-control" aria-label="Aetheris home">
           <BrandMark size={22} />
