@@ -22,7 +22,7 @@ const COLUMNS = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t">
+    <footer className="border-t bg-bg">
       <div className="mx-auto grid max-w-[1200px] gap-10 px-6 py-14 md:grid-cols-[1.5fr_1fr_1fr]">
         <div className="flex flex-col gap-3">
           <BrandMark size={22} />

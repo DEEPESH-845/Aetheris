@@ -8,9 +8,12 @@ export default function LandingPage() {
   return (
     <>
       <Hero />
-      <StackLogos />
       <HowItWorks />
-      <Capabilities />
+      {/* Opaque block: the scene behind it pauses while this fills the viewport. */}
+      <div data-scene-cover className="bg-bg">
+        <StackLogos />
+        <Capabilities />
+      </div>
       <SandboxCta />
     </>
   );
