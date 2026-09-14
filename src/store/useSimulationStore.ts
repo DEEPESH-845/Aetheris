@@ -140,6 +140,7 @@ export interface Threat {
 export interface AIThought {
   id: string;
   timestamp: string;
+  threatId?: string;
   text: string;
   type: 'info' | 'warning' | 'action' | 'success';
 }
@@ -182,6 +183,8 @@ interface SimulationState {
   isSimulationRunning: boolean;
   autonomous: boolean;
   setAutonomous: (v: boolean) => void;
+  selectedThreatId: string | null;
+  selectThreat: (id: string | null) => void;
   globalThreatScore: number;
   networkNodes: Record<string, NetworkNode>;
   activeThreats: Threat[];
@@ -248,6 +251,8 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   isSimulationRunning: true,
   autonomous: true,
   setAutonomous: (autonomous) => set({ autonomous }),
+  selectedThreatId: null,
+  selectThreat: (selectedThreatId) => set({ selectedThreatId }),
   systemHealth: {
     cpu: 40,
     networkTraffic: 200,

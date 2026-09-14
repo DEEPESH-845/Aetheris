@@ -94,7 +94,6 @@ describe("org settings", () => {
     expect(after.sensors.intel).toBe(false);
     const viewer = appRouter.createCaller({ userId: userB, orgId: a.orgId, role: "VIEWER", ip: null, prisma });
     await expect(viewer.org.updateSettings({ ...after, autonomous: true })).rejects.toMatchObject({ code: "FORBIDDEN" });
-    // @ts-expect-error out-of-range value must be rejected by zod
     await expect(owner.org.updateSettings({ ...after, aggressiveness: 500 })).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });

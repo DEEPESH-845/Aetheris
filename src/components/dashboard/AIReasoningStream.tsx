@@ -60,7 +60,7 @@ export function AIReasoningStream() {
         <dl className="flex gap-4 font-mono tabular-nums text-ink-subtle">
           <div className="flex gap-1"><dt>Confidence</dt><dd className="text-ink">{confidence}%</dd></div>
           <div className="flex gap-1"><dt>RAG hits</dt><dd className="text-ink">{vectorDbHits}</dd></div>
-          <div className="flex gap-1"><dt>Latency</dt><dd className="text-ink">{modelLatency}\u00a0ms</dd></div>
+          <div className="flex gap-1"><dt>Latency</dt><dd className="text-ink">{modelLatency}&nbsp;ms</dd></div>
         </dl>
       </div>
 

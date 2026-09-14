@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { api } from "@/utils/trpc";
 import { useSimulationStore } from "@/store/useSimulationStore";
 import { POSTURES, SENSORS, type OrgSettings } from "@/lib/org-settings";
@@ -28,21 +28,21 @@ function ToggleRow({ id, label, hint, checked, onChange }: { id: string; label: 
 export default function SettingsPage() {
   const sliderId = useId();
   const settings = api.org.getSettings.useQuery();
-  const [draft, setDraft] = useState<OrgSettings | null>(null);
+  // Unsaved edits layered over the server copy; no effect needed to seed local state.
+  const [edits, setEdits] = useState<Partial<OrgSettings>>({});
   const [saved, setSaved] = useState(false);
   const utils = api.useUtils();
   const update = api.org.updateSettings.useMutation({
     onSuccess: (data) => {
       utils.org.getSettings.setData(undefined, data);
+      setEdits({});
       useSimulationStore.getState().setAutonomous(data.autonomous);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     },
   });
 
-  useEffect(() => {
-    if (settings.data && !draft) setDraft(settings.data);
-  }, [settings.data, draft]);
+  const draft = settings.data ? { ...settings.data, ...edits } : null;
 
   if (!draft) {
     return (
@@ -53,7 +53,7 @@ export default function SettingsPage() {
     );
   }
   const { aggressiveness, autonomous, posture, sensors } = draft;
-  const patch = (p: Partial<OrgSettings>) => setDraft((d) => (d ? { ...d, ...p } : d));
+  const patch = (p: Partial<OrgSettings>) => setEdits((d) => ({ ...d, ...p }));
 
   return (
     <form

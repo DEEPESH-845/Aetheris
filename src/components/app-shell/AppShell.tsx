@@ -10,6 +10,7 @@ import { SidebarNav } from "./SidebarNav";
 import { TopBar } from "./TopBar";
 import { CommandPalette } from "./CommandPalette";
 import { ForceDefenseDialog } from "./ForceDefenseDialog";
+import { IncidentDrawer } from "@/components/dashboard/IncidentDrawer";
 import { setSidebarCollapsed, useSidebarCollapsed } from "./sidebar-store";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Sheet>
         <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} onForceDefense={() => setForceOpen(true)} />
         <ForceDefenseDialog open={forceOpen} onOpenChange={setForceOpen} />
+        <IncidentDrawer />
       </div>
     </TooltipProvider>
   );

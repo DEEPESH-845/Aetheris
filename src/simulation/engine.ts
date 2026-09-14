@@ -352,7 +352,7 @@ export function useSimulationEngine() {
         // Fire phase-appropriate AI thought
         const thoughts = AI_REASONING_THOUGHTS[currentPhase];
         if (thoughts) {
-          st.addAIThought(randItem(thoughts));
+          st.addAIThought({ ...randItem(thoughts), threatId: threat.id });
         }
 
         // Synthesize attacker profile on ENRICH phase
