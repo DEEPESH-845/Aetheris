@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import { List, MagnifyingGlass, ShieldSlash } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { NAV_GROUPS, isActiveRoute } from "./SidebarNav";
+import { NAV_GROUPS, isActiveRoute } from "@/lib/nav";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 
 interface TopBarProps {

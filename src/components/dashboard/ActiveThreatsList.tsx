@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ShieldCheck } from "@phosphor-icons/react";
 import { useSimulationStore } from "@/store/useSimulationStore";
 import { SeverityBadge, StatusBadge } from "@/components/shared/StatusBadge";
@@ -10,7 +9,6 @@ import { threatStatusTone as statusTone } from "./IncidentDrawer";
 export function ActiveThreatsList() {
   const activeThreats = useSimulationStore((s) => s.activeThreats);
   const selectThreat = useSimulationStore((s) => s.selectThreat);
-  const reduce = useReducedMotion();
 
   if (activeThreats.length === 0) {
     return <EmptyState icon={ShieldCheck} title="No active threats" hint="New detections appear here the moment the pipeline flags them." />;
@@ -18,15 +16,8 @@ export function ActiveThreatsList() {
 
   return (
     <ul className="flex flex-col divide-y">
-      <AnimatePresence initial={false}>
         {activeThreats.map((threat) => (
-          <motion.li
-            key={threat.id}
-            initial={reduce ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
+          <li key={threat.id} className="animate-in fade-in duration-200 motion-reduce:animate-none">
             <button
               type="button"
               onClick={() => selectThreat(threat.id)}
@@ -50,9 +41,8 @@ export function ActiveThreatsList() {
               </p>
             )}
             </button>
-          </motion.li>
+          </li>
         ))}
-      </AnimatePresence>
     </ul>
   );
 }

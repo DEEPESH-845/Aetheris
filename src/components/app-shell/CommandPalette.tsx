@@ -13,7 +13,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useSimulationStore } from "@/store/useSimulationStore";
-import { NAV_GROUPS } from "./SidebarNav";
+import { NAV_GROUPS } from "@/lib/nav";
 
 interface CommandPaletteProps {
   open: boolean;

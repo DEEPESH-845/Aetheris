@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useReducedMotion } from "framer-motion";
+import { useMediaQuery, useReducedMotion } from "@/lib/use-media-query";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { sceneState } from "./scene-state";
 
@@ -23,17 +23,9 @@ export function DeceptionScene() {
   const onLanding = pathname === "/";
   const root = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-  const [desktop, setDesktop] = useState(false);
+  const desktop = useMediaQuery(DESKTOP) === true;
   const [covered, setCovered] = useState(false);
   const [inHero, setInHero] = useState(true);
-
-  useEffect(() => {
-    const mq = window.matchMedia(DESKTOP);
-    const apply = () => setDesktop(mq.matches);
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
-  }, []);
 
   useEffect(() => {
     if (!desktop || reduce) return;

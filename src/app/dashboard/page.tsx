@@ -12,7 +12,7 @@ import { TelemetryPacketFeed } from "@/components/dashboard/TelemetryPacketFeed"
 import { NetworkTopology } from "@/components/visualization/NetworkTopology";
 import { ThreatScoreChart } from "@/components/visualization/ThreatScoreChart";
 import { NetworkTrafficChart } from "@/components/visualization/NetworkTrafficChart";
-import { threatTone } from "@/components/app-shell/SidebarNav";
+import { threatTone } from "@/lib/nav";
 
 export default function DashboardPage() {
   const globalThreatScore = useSimulationStore((s) => s.globalThreatScore);

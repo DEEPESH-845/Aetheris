@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-media-query";
 import { Button } from "@/components/ui/button";
 import { EASE, gsap, SplitText, useGSAP } from "@/lib/gsap";
 import { sceneState } from "./scene/scene-state";
