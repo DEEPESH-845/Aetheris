@@ -281,6 +281,23 @@ export function useSimulationEngine() {
       return;
     }
 
+    // First run: seed one incident so the loop is visible without finding Sandbox Lab.
+    const SEED_KEY = 'aetheris.seeded';
+    let seeded = true;
+    try { seeded = sessionStorage.getItem(SEED_KEY) === '1'; } catch {}
+    const seedTimer = !seeded && useSimulationStore.getState().incidentLog.length === 0
+      ? setTimeout(() => {
+          try { sessionStorage.setItem(SEED_KEY, '1'); } catch {}
+          const st = useSimulationStore.getState();
+          if (st.incidentLog.length > 0) return;
+          st.addThreat({
+            id: `TRT-${randInt(1000, 9999)}`, type: 'APT Intrusion', sourceIp: '185.220.101.3', targetNode: 'web-cluster-1',
+            severity: 'CRITICAL', confidence: 94, timestamp: Date.now(), status: 'DETECTED',
+          });
+          st.updateNodeStatus('web-cluster-1', 'compromised');
+        }, 2500)
+      : null;
+
     // Staggered generators at different frequencies to mimic real pipeline cadence
     let tick = 0;
     localRef.current = setInterval(() => {
@@ -351,6 +368,19 @@ export function useSimulationEngine() {
         st.updateAIReasoningState({ currentPhase: 'IDLE', isThinking: false, currentThreatId: null });
       }
 
+      // Threat progression: detect -> analyze -> redirect into a twin. Nothing resolves until intel exists (see ops below).
+      if (!wsRef.current) {
+        st.activeThreats.forEach(threat => {
+          const age = (Date.now() - threat.timestamp) / 1000;
+          if (threat.status === 'DETECTED' && age >= 3) {
+            st.updateThreatStatus(threat.id, 'ANALYZING');
+          } else if (threat.status === 'ANALYZING' && age >= 8) {
+            st.updateThreatStatus(threat.id, 'MITIGATING', 'Traffic redirected to honey twin');
+            st.updateNodeStatus(threat.targetNode, 'redirected');
+          }
+        });
+      }
+
       // Phase 5: Sandbox Twin Lifecycle Orchestration
       // Spawn a twin the first time a threat enters MITIGATING status
       const mitigatingThreats = st.activeThreats.filter(t => t.status === 'MITIGATING');
@@ -367,15 +397,13 @@ export function useSimulationEngine() {
         const age = (Date.now() - twin.spawnedAt) / 1000; // seconds
 
         // Lifecycle progression based on age
-        if (age < 8 && twin.lifecycle === 'CLONING') {
-          st.updateTwinLifecycle(twin.id, 'CLONING');
-        } else if (age < 20 && twin.lifecycle === 'CLONING') {
+        if (age >= 5 && twin.lifecycle === 'CLONING') {
           st.updateTwinLifecycle(twin.id, 'PROVISIONING');
-        } else if (age < 35 && twin.lifecycle === 'PROVISIONING') {
+        } else if (age >= 12 && twin.lifecycle === 'PROVISIONING') {
           st.updateTwinLifecycle(twin.id, 'HARDENING');
-        } else if (age < 50 && twin.lifecycle === 'HARDENING') {
+        } else if (age >= 18 && twin.lifecycle === 'HARDENING') {
           st.updateTwinLifecycle(twin.id, 'ONLINE');
-        } else if (age >= 50 && twin.lifecycle === 'ONLINE') {
+        } else if (age >= 22 && twin.lifecycle === 'ONLINE') {
           st.updateTwinLifecycle(twin.id, 'COMBAT');
         }
 
@@ -394,8 +422,10 @@ export function useSimulationEngine() {
         }
 
         // Simulate attacker sessions during COMBAT phase
-        if (twin.lifecycle === 'COMBAT' && tick % 6 === 0) {
-          const cmd = randItem(ATTACKER_COMMANDS);
+        if (twin.lifecycle === 'COMBAT' && tick % 3 === 0) {
+          const cmd = twin.attackerSessions.length === 0
+            ? randItem(ATTACKER_COMMANDS.filter(c => c.suspicious))
+            : randItem(ATTACKER_COMMANDS);
           st.addAttackerSession(twin.id, {
             id: Math.random().toString(36).substring(2, 9),
             ts: Date.now(),
@@ -420,13 +450,14 @@ export function useSimulationEngine() {
 
       // Phase 6: Defensive Operations Lifecycle Orchestration
       // Trigger a defensive operation when AI reasoning enters EXECUTE phase.
-      if (st.aiReasoningState.currentPhase === 'EXECUTE' && st.activeThreats.length > 0) {
-        const threat = st.activeThreats[0];
+      st.activeThreats.forEach(threat => {
+        const twin = Object.values(st.sandboxTwins).find(tw => tw.threatId === threat.id);
+        const hasIntel = twin?.lifecycle === 'COMBAT' && twin.attackerSessions.length >= 3;
         const existingOp = Object.values(st.defensiveOperations).find(op => op.threatId === threat.id);
-        if (!existingOp) {
+        if (hasIntel && !existingOp) {
           st.addDefensiveOperation(createDefensiveOperation(threat));
         }
-      }
+      });
 
       // Drive lifecycle of defensive operations
       Object.values(st.defensiveOperations).forEach(op => {
@@ -452,6 +483,7 @@ export function useSimulationEngine() {
 
     return () => {
       if (localRef.current) clearInterval(localRef.current);
+      if (seedTimer) clearTimeout(seedTimer);
     };
   }, [isSimulationRunning]);
 

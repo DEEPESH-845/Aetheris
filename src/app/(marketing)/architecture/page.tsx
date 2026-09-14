@@ -30,10 +30,10 @@ export default function ArchitecturePage() {
       <section className="mx-auto max-w-[1200px] px-6 pt-20 pb-16">
         <div className="max-w-[60ch]">
           <h1 className="text-display text-[clamp(2.25rem,4.4vw,3.25rem)] leading-[1.05] font-semibold tracking-[-0.02em] text-ink">
-            Built as an event-driven mesh
+            Target architecture
           </h1>
           <p className="mt-6 text-[17px] leading-relaxed text-ink-muted">
-            Kernel telemetry feeds a reasoning core that provisions deception at the edge. Four planes, one loop.
+            The design Aetheris is built toward: kernel telemetry feeding a reasoning core that provisions deception at the edge. The current release simulates these planes so the operator workflow can be evaluated before sensors ship.
           </p>
           <div className="mt-8">
             <Button size="lg" render={<Link href="/dashboard" />}>

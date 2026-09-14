@@ -10,6 +10,7 @@ const schema = z.object({
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1, "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is required"),
   CLERK_SECRET_KEY: z.string().min(1, "CLERK_SECRET_KEY is required"),
   NEXT_PUBLIC_BACKEND_WS_URL: optionalUrl,
+  NEXT_PUBLIC_BILLING_ENABLED: z.enum(["true", "false"]).default("false"),
   STRIPE_SECRET_KEY: z.string().optional().or(z.literal("").transform(() => undefined)),
   STRIPE_WEBHOOK_SECRET: z.string().optional().or(z.literal("").transform(() => undefined)),
 });

@@ -49,7 +49,7 @@ export default function DefensiveOpsPage() {
     .sort((a, b) => a.ts - b.ts);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
       <PageHeader title="Defensive operations" description="Countermeasures the system has taken on its own, and what they touched." />
 
       <Panel className="grid grid-cols-3 divide-x">
@@ -58,7 +58,7 @@ export default function DefensiveOpsPage() {
         <StatBlock label="Isolated nodes" value={isolated.length} tone={isolated.length > 0 ? "danger" : "default"} />
       </Panel>
 
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-12">
+      <div className="grid min-h-0 gap-4 lg:flex-1 lg:grid-cols-12">
         <div className="flex min-h-0 flex-col gap-4 lg:col-span-7">
           <Panel className="min-h-[220px] flex-1">
             <PanelHeader title="Countermeasures" actions={<span className="font-mono text-xs text-ink-subtle">{operations.length}</span>} />

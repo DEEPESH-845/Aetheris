@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { Prisma } from "@prisma/client";
-import { getStripe, isStripeConfigured, mapPriceToPlan } from "@/lib/stripe";
+import { getStripe, mapPriceToPlan } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import { env } from "@/env";
 
@@ -40,7 +40,8 @@ async function notify(orgId: string, title: string, message: string) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isStripeConfigured() || !env.STRIPE_WEBHOOK_SECRET) {
+  // Existing subscriptions keep emitting events even while self-serve checkout is off, so gate on keys only.
+  if (!env.STRIPE_SECRET_KEY || !env.STRIPE_WEBHOOK_SECRET) {
     return NextResponse.json({ error: "Billing not configured" }, { status: 503 });
   }
   const sig = req.headers.get("stripe-signature");

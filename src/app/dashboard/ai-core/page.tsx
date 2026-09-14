@@ -95,10 +95,10 @@ export default function AICorePage() {
   const observed = allTtps.filter((t) => t.observed).length;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
       <PageHeader title="AI core" description="LangGraph state, MITRE correlation, and attribution for the current threat." />
 
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-3">
+      <div className="grid min-h-0 gap-4 lg:flex-1 lg:grid-cols-3">
         <Panel className="min-h-[320px]">
           <PanelHeader title="Reasoning graph" description="LangGraph state machine" />
           <PanelBody padded={false} scroll>

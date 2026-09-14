@@ -116,7 +116,7 @@ export default function OrchestrationPage() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
       <PageHeader
         title="Orchestration"
         description="Proxmox cloning, Terraform and Ansible runs, and the eBPF sensors on each twin."
@@ -137,7 +137,7 @@ export default function OrchestrationPage() {
       )}
 
       {activeTwin ? (
-        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
+        <div className="grid min-h-0 gap-4 lg:flex-1 lg:grid-cols-2">
           <Panel className="min-h-[280px]">
             <PanelHeader title="Terraform and Ansible" actions={<LifecycleBadge state={activeTwin.lifecycle} />} />
             <PanelBody padded={false}>

@@ -35,8 +35,8 @@ const plans: { id: PlanId; name: string; price: string; period: string; descript
     name: "Pro",
     price: "$99",
     period: "per month",
-    description: "For mid-size teams that want the full AI core.",
-    features: ["Everything in Starter", "100 simulations per month", "20 sandbox twins", "All 6 attack vectors", "AI core access", "Autonomous defense mode", "REST API access", "30-day audit log", "Priority support, 24h"],
+    description: "For mid-size teams that want the full reasoning view.",
+    features: ["Everything in Starter", "100 simulations per month", "20 sandbox twins", "All 6 attack vectors", "Reasoning stream and attacker profiles", "30-day audit log", "Priority support, 24h"],
     cta: "Start free trial",
     recommended: true,
   },
@@ -46,13 +46,14 @@ const plans: { id: PlanId; name: string; price: string; period: string; descript
     price: "$299",
     period: "per month",
     description: "For enterprise SOCs running fully autonomous.",
-    features: ["Everything in Pro", "Unlimited simulations", "50 sandbox twins", "Custom attack vectors", "Playbook builder", "Team management, 50 seats", "365-day audit log", "Webhook integrations", "White labeling", "Phone support, 4h"],
+    features: ["Everything in Pro", "Unlimited simulations", "50 sandbox twins", "Team management, 50 seats", "365-day audit log", "Phone support, 4h"],
     cta: "Start free trial",
   },
 ];
 
 export default function PricingPage() {
   const { isSignedIn } = useAuth();
+  const billingEnabled = process.env.NEXT_PUBLIC_BILLING_ENABLED === "true";
   const router = useRouter();
   const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +90,13 @@ export default function PricingPage() {
         </Button>
       );
     }
+    if (!billingEnabled) {
+      return (
+        <Button variant={variant} className="w-full" render={<a href="mailto:sales@aetheris.ai?subject=Aetheris%20early%20access" />}>
+          Contact sales
+        </Button>
+      );
+    }
     if (!isSignedIn) {
       return (
         <SignInButton mode="modal" forceRedirectUrl="/pricing">
@@ -113,7 +121,7 @@ export default function PricingPage() {
           Pricing
         </h1>
         <p className="mt-6 text-[17px] leading-relaxed text-ink-muted">
-          Start free. Every paid plan includes a 14-day trial.
+          {billingEnabled ? "Start free. Every paid plan includes a 14-day trial." : "Self-serve billing opens with the first production release. Paid plans are available through sales today."}
         </p>
       </div>
 

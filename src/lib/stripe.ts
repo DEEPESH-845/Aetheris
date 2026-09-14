@@ -14,7 +14,9 @@ export function getStripe(): Stripe {
   return _stripe;
 }
 
-export const isStripeConfigured = () => Boolean(process.env.STRIPE_SECRET_KEY);
+/** Self-serve billing stays off until the product has something real to charge for. */
+export const isStripeConfigured = () =>
+  process.env.NEXT_PUBLIC_BILLING_ENABLED === "true" && Boolean(process.env.STRIPE_SECRET_KEY);
 
 export const PLANS = {
   FREE: { name: "Free", priceId: null, monthlyPriceId: null, yearlyPriceId: null },

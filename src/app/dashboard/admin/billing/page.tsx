@@ -93,7 +93,7 @@ function BillingContent() {
     }
   }
 
-  const upgrades = UPGRADES[plan] ?? [];
+  const upgrades = process.env.NEXT_PUBLIC_BILLING_ENABLED === "true" ? (UPGRADES[plan] ?? []) : [];
 
   return (
     <div className="flex flex-col gap-4">

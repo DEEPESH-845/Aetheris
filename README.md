@@ -32,6 +32,16 @@
 
 ---
 
+## Current status
+
+Aetheris is an interactive prototype.
+The command center, deception map, reasoning stream, twin lifecycle, and attacker sessions are driven by a built-in simulation so the operator workflow can be evaluated end to end.
+No sensor, kernel hook, hypervisor, message bus, or language model is wired up yet.
+What is real today: Clerk authentication, multi-tenant organizations with roles and an audit log, and Stripe billing (disabled by flag until there is something to charge for).
+Everything under "Core Architecture" below describes the target design, not shipped infrastructure.
+
+---
+
 <a id="the-problem"></a>
 ## 🛑 The Problem: Reactive Security is Obsolete
 
@@ -65,9 +75,9 @@ The attacker believes they are successfully exploiting the production network, w
 <br/>
 
 <a id="core-architecture"></a>
-## 🏗️ Core Architecture
+## 🏗️ Core Architecture (target design)
 
-Aetheris utilizes a decoupled, distributed microservices architecture designed to process petabytes of telemetry without dropping packets, instantly routing threats to sandboxed environments.
+The planned architecture is a decoupled pipeline from kernel telemetry to sandboxed deception. None of the planes below exist yet outside the simulation.
 
 ### Platform Topology
 
@@ -160,9 +170,9 @@ stateDiagram-v2
 
 <br/>
 
-## 🛠️ Technology Stack Breakdown
+## 🛠️ Technology Stack (planned)
 
-Aetheris is engineered using a modern, decoupled microservices architecture designed for absolute extreme performance, zero-latency streaming, and high-fidelity machine learning execution.
+The frontend row is shipped. The remaining rows describe the intended stack for each plane.
 
 <div align="center">
 
@@ -171,7 +181,7 @@ Aetheris is engineered using a modern, decoupled microservices architecture desi
 | **🌐 Command Center (Frontend)** | <img src="https://img.shields.io/badge/Next.js-000?logo=next.js&amp;style=flat-square" alt="Next.js"/> <img src="https://img.shields.io/badge/React_19-20232A?logo=react&amp;logoColor=61DAFB&amp;style=flat-square" alt="React 19"/> <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&amp;logoColor=white&amp;style=flat-square" alt="Tailwind"/> <img src="https://img.shields.io/badge/Zustand-4A4A55?style=flat-square" alt="Zustand"/> | Next.js 16 (App Router) combined with Framer Motion provides a highly optimized, 60fps cinematic glassmorphism UI. Delivers elite, real-time God-level situational awareness during active threat engagements. |
 | **⚡ API Gateway & Backend** | <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&amp;logoColor=white&amp;style=flat-square" alt="FastAPI"/> <img src="https://img.shields.io/badge/Python_3.11-3670A0?logo=python&amp;logoColor=ffdd54&amp;style=flat-square" alt="Python"/> <img src="https://img.shields.io/badge/WebSockets-010101?logo=socket.io&amp;logoColor=white&amp;style=flat-square" alt="WebSockets"/> <img src="https://img.shields.io/badge/Clerk_Auth-6C47FF?logo=clerk&amp;logoColor=white&amp;style=flat-square" alt="Clerk"/> | Asynchronous Python engine handling thousands of concurrent WebSocket telemetry streams and serving as the primary bridge between the data plane and the frontend orchestration layer. |
 | **🧠 AI & Machine Learning Core** | <img src="https://img.shields.io/badge/LangGraph-000000?style=flat-square" alt="LangGraph"/> <img src="https://img.shields.io/badge/LangChain-121212?style=flat-square" alt="LangChain"/> <img src="https://img.shields.io/badge/vLLM-005571?style=flat-square" alt="vLLM"/> <img src="https://img.shields.io/badge/Qdrant-EF4D5D?style=flat-square" alt="Qdrant"/> | LangGraph orchestrates deterministic state machine routing, replacing opaque LLM hallucination with predictable, enterprise-grade AI reasoning and mitigation decision trees. |
-| **📊 Data & Telemetry Plane** | <img src="https://img.shields.io/badge/Apache_Kafka-231F20?logo=apachekafka&amp;logoColor=white&amp;style=flat-square" alt="Kafka"/> <img src="https://img.shields.io/badge/ClickHouse-FFCC01?logo=clickhouse&amp;logoColor=black&amp;style=flat-square" alt="ClickHouse"/> | Distributed event streaming (Kafka) paired with sub-second analytical querying (ClickHouse) ensures petabytes of telemetry are processed without dropping critical intrusion packets. |
+| **📊 Data & Telemetry Plane** | <img src="https://img.shields.io/badge/Apache_Kafka-231F20?logo=apachekafka&amp;logoColor=white&amp;style=flat-square" alt="Kafka"/> <img src="https://img.shields.io/badge/ClickHouse-FFCC01?logo=clickhouse&amp;logoColor=black&amp;style=flat-square" alt="ClickHouse"/> | Distributed event streaming (Kafka) paired with sub-second analytical querying (ClickHouse) is the planned path for high-volume telemetry. |
 | **☁️ Infrastructure & DevOps** | <img src="https://img.shields.io/badge/Railway-0B0D0E?logo=railway&amp;logoColor=white&amp;style=flat-square" alt="Railway"/> <img src="https://img.shields.io/badge/Vercel-000?logo=vercel&amp;style=flat-square" alt="Vercel"/> <img src="https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&amp;logoColor=white&amp;style=flat-square" alt="Kubernetes"/> <img src="https://img.shields.io/badge/Terraform-7B42BC?logo=terraform&amp;logoColor=white&amp;style=flat-square" alt="Terraform"/> | Declarative infrastructure seamlessly deployed across edge (Vercel) and scalable cloud environments (Railway), orchestrated by Proxmox VE and Cilium eBPF for kernel-level interception. |
 
 </div>
@@ -218,15 +228,15 @@ We operate like an elite engineering team. We welcome contributions from DevOps 
 
 ## ⚠️ Disclaimer & License
 
-**AETHERIS is an autonomous cyber warfare tool.** 
-This platform contains modules designed to isolate infrastructure and modify kernel-level network policies autonomously. It must **ONLY** be deployed in authorized enterprise environments or sandboxed cyber ranges. The maintainers assume no liability for infrastructural damage caused by autonomous misconfiguration.
+**Aetheris is designed to act on infrastructure autonomously.** 
+When the planned modules ship, they will isolate hosts and modify network policy without a human in the loop. Deploy only in authorized environments or sandboxed ranges. The maintainers assume no liability for infrastructural damage caused by autonomous misconfiguration.
 
 Distributed under the **MIT License**.
 
 ---
 
 <div align="center">
-  <p><b>Defend at God Speed.</b></p>
+  <p><b>Deception you can watch reason.</b></p>
   
   <p align="center">
     <a href="https://x.com/Deepesh_tsx">

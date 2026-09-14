@@ -35,7 +35,7 @@ export function PipelineStatusBar() {
   return (
     <Panel className="flex-row flex-wrap items-stretch divide-x md:flex-nowrap" aria-label="Pipeline status">
       <div className="flex items-center gap-2 px-4 py-2.5">
-        <StatusBadge label={isRunning ? "Pipeline live" : "Pipeline paused"} tone={isRunning ? "success" : "neutral"} live={isRunning} />
+        <StatusBadge label={isRunning ? "Simulation running" : "Simulation paused"} tone={isRunning ? "success" : "neutral"} live={isRunning} />
       </div>
       <Metric label="Kafka lag" value={pipelineHealth.kafkaLag} unit="msg" tone={kafkaTone} />
       <Metric label="Zeek heartbeat" value={pipelineHealth.zeekHeartbeat} unit="ms" tone={zeekTone} />

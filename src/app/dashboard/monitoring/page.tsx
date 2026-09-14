@@ -53,7 +53,7 @@ function ThreatMonitor() {
   });
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
       <PageHeader title="Threat monitor" description="Every incident the pipeline has raised, with the response it received." />
 
       <div className="flex flex-wrap items-center gap-3">
