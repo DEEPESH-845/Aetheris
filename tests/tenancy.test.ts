@@ -23,7 +23,9 @@ const userB = `user_${RUN}_b`;
 
 async function cleanup() {
   const orgs = await prisma.membership.findMany({ where: { userId: { in: [userA, userB] } }, select: { orgId: true } });
-  await prisma.organization.deleteMany({ where: { id: { in: orgs.map((o) => o.orgId) } } });
+  const ids = orgs.map((o) => o.orgId);
+  await prisma.auditLog.deleteMany({ where: { orgId: { in: ids } } });
+  await prisma.organization.deleteMany({ where: { id: { in: ids } } });
   await prisma.user.deleteMany({ where: { id: { in: [userA, userB] } } });
 }
 

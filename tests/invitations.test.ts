@@ -25,10 +25,12 @@ const invitee = `user_${RUN}_i`;
 const stranger = `user_${RUN}_s`;
 
 async function cleanup() {
-  const ids = [owner, invitee, stranger];
-  const orgs = await prisma.membership.findMany({ where: { userId: { in: ids } }, select: { orgId: true } });
-  await prisma.organization.deleteMany({ where: { id: { in: orgs.map((o) => o.orgId) } } });
-  await prisma.user.deleteMany({ where: { id: { in: ids } } });
+  const users = [owner, invitee, stranger];
+  const orgs = await prisma.membership.findMany({ where: { userId: { in: users } }, select: { orgId: true } });
+  const ids = orgs.map((o) => o.orgId);
+  await prisma.auditLog.deleteMany({ where: { orgId: { in: ids } } });
+  await prisma.organization.deleteMany({ where: { id: { in: ids } } });
+  await prisma.user.deleteMany({ where: { id: { in: users } } });
 }
 beforeAll(cleanup);
 afterAll(async () => { await cleanup(); await prisma.$disconnect(); });

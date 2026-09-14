@@ -118,7 +118,7 @@ model AuditLog {
   ip        String?
   createdAt DateTime @default(now())
 
-  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
 
   @@index([orgId, createdAt])
   @@index([orgId, action])
