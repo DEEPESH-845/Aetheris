@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check } from "@phosphor-icons/react";
 import { SignInButton, useAuth } from "@clerk/nextjs";
 import { Badge } from "@/components/ui/badge";
@@ -52,12 +53,13 @@ const plans: { id: PlanId; name: string; price: string; period: string; descript
 
 export default function PricingPage() {
   const { isSignedIn } = useAuth();
+  const router = useRouter();
   const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleCheckout(planId: PlanId) {
     if (planId === "FREE") {
-      window.location.assign("/dashboard");
+      router.push("/dashboard");
       return;
     }
     if (!isSignedIn) return;

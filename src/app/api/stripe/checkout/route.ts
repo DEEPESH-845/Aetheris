@@ -1,95 +1,84 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe, PLANS, type PlanType } from "@/lib/stripe";
-import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import { z } from "zod";
+import { getStripe, isStripeConfigured, PLANS } from "@/lib/stripe";
+import { prisma } from "@/lib/db";
+import { ensureTenant } from "@/server/tenant";
+import { env } from "@/env";
+
+const bodySchema = z.object({
+  plan: z.enum(["STARTER", "PRO", "BUSINESS"]),
+  interval: z.enum(["monthly", "yearly"]).default("monthly"),
+});
 
 export async function POST(req: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isStripeConfigured()) {
+    return NextResponse.json(
+      { code: "BILLING_UNAVAILABLE", error: "Self-serve billing is not available yet. Contact sales@aetheris.ai for access." },
+      { status: 503 },
+    );
+  }
+
+  const parsed = bodySchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+  }
+  const { plan, interval } = parsed.data;
+
   try {
-    const session = await auth();
-    if (!session.userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { orgId, role } = await ensureTenant(userId);
+    if (role !== "OWNER" && role !== "ADMIN") {
+      return NextResponse.json({ error: "Only an owner or admin can change the plan." }, { status: 403 });
     }
 
-    const { plan, interval = "monthly" } = await req.json();
-
-    if (!plan || !(plan in PLANS) || plan === "FREE") {
-      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
-    }
-
-    let membership = await prisma.membership.findFirst({
-      where: { userId: session.userId },
-      include: { org: true },
+    const org = await prisma.organization.findUniqueOrThrow({
+      where: { id: orgId },
+      select: { stripeCustomerId: true, stripeSubscriptionId: true },
     });
-
-    // Auto-create organization for new users who don't have one yet
-    if (!membership) {
-      const user = await prisma.user.findUnique({ where: { id: session.userId } });
-      const slug = `org-${session.userId.slice(0, 8)}-${Date.now().toString(36)}`;
-      const org = await prisma.organization.create({
-        data: {
-          name: user?.name ?? user?.email ?? "My Organization",
-          slug,
-          plan: "FREE",
-          members: {
-            create: {
-              userId: session.userId,
-              role: "OWNER",
-            },
-          },
-        },
-        include: { members: true },
-      });
-      membership = { ...org.members[0], org };
-    }
-
-    if (!membership) {
-      return NextResponse.json({ error: "Failed to create organization" }, { status: 500 });
-    }
-
-    const org = membership.org;
-    const planConfig = PLANS[plan as PlanType];
     const stripe = getStripe();
 
-    // Get or create Stripe customer
-    let customerId = org.stripeCustomerId;
-    if (!customerId) {
-      const user = await prisma.user.findUnique({ where: { id: session.userId } });
-      const customer = await stripe.customers.create({
-        email: user?.email ?? session.userId,
-        metadata: { orgId: org.id, userId: session.userId },
+    // An org with a live subscription changes plan in the portal, never through a second checkout.
+    if (org.stripeSubscriptionId && org.stripeCustomerId) {
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: org.stripeCustomerId,
+        return_url: `${env.NEXT_PUBLIC_APP_URL}/dashboard/admin/billing`,
       });
-      customerId = customer.id;
-      await prisma.organization.update({
-        where: { id: org.id },
-        data: { stripeCustomerId: customerId },
-      });
+      return NextResponse.json({ url: portal.url });
     }
 
-    const priceId = interval === "yearly"
-      ? planConfig.yearlyPriceId
-      : planConfig.monthlyPriceId;
-
+    const priceId = interval === "yearly" ? PLANS[plan].yearlyPriceId : PLANS[plan].monthlyPriceId;
     if (!priceId) {
-      return NextResponse.json({ error: "Stripe not configured for this plan" }, { status: 500 });
+      return NextResponse.json({ code: "BILLING_UNAVAILABLE", error: "This plan is not available yet." }, { status: 503 });
+    }
+
+    let customerId = org.stripeCustomerId;
+    if (!customerId) {
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+      const customer = await stripe.customers.create(
+        { email: user?.email, metadata: { orgId, userId } },
+        { idempotencyKey: `customer:${orgId}` },
+      );
+      customerId = customer.id;
+      await prisma.organization.update({ where: { id: orgId }, data: { stripeCustomerId: customerId } });
     }
 
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
-      payment_method_types: ["card", "upi"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/admin/billing?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
-      subscription_data: {
-        trial_period_days: 14,
-        metadata: { orgId: org.id },
-      },
-      metadata: { orgId: org.id },
+      success_url: `${env.NEXT_PUBLIC_APP_URL}/dashboard/admin/billing?success=true`,
+      cancel_url: `${env.NEXT_PUBLIC_APP_URL}/dashboard/admin/billing?canceled=true`,
+      subscription_data: { trial_period_days: 14, metadata: { orgId } },
+      metadata: { orgId },
     });
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
     console.error("Stripe checkout error:", error);
-    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
+    return NextResponse.json({ error: "Could not start checkout. Try again." }, { status: 500 });
   }
 }

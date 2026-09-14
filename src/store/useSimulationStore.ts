@@ -280,7 +280,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
 
   addThreat: (threat) => set((state) => ({
     activeThreats: [threat, ...state.activeThreats],
-    incidentLog: [threat, ...state.incidentLog],
+    incidentLog: [threat, ...state.incidentLog].slice(0, 500),
     globalThreatScore: Math.min(100, state.globalThreatScore + (threat.severity === 'CRITICAL' ? 30 : threat.severity === 'HIGH' ? 20 : 10))
   })),
 

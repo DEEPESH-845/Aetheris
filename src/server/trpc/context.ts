@@ -1,24 +1,22 @@
-import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import type { Role } from "@prisma/client";
+import { prisma } from "@/lib/db";
+import { ensureTenant } from "@/server/tenant";
 
-export async function createContext() {
-  const session = await auth();
-  const userId = session.userId;
+export async function createContext(opts?: { req?: Request }) {
+  const { userId } = await auth();
 
   let orgId: string | null = null;
-  let role: string | null = null;
-
+  let role: Role | null = null;
   if (userId) {
-    const membership = await prisma.membership.findFirst({
-      where: { userId },
-      orderBy: { createdAt: "asc" },
-      select: { orgId: true, role: true },
-    });
-    orgId = membership?.orgId ?? null;
-    role = membership?.role ?? null;
+    const tenant = await ensureTenant(userId);
+    orgId = tenant.orgId;
+    role = tenant.role;
   }
 
-  return { userId, orgId, role, prisma };
+  const ip = opts?.req?.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+
+  return { userId, orgId, role, ip, prisma };
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>;

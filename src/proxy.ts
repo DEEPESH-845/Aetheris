@@ -1,12 +1,16 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isDashboardRoute = createRouteMatcher([
+// Stripe webhooks and the health probe carry no Clerk session and must stay reachable.
+// Route handlers under /api/stripe verify the session themselves.
+export const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
-  "/api/(.*)",
+  "/api/trpc(.*)",
+  "/api/stripe/checkout",
+  "/api/stripe/portal",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isDashboardRoute(req)) {
+  if (isProtectedRoute(req)) {
     await auth.protect();
   }
 });

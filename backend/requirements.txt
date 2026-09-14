@@ -1,7 +1,5 @@
-fastapi
-uvicorn
-websockets
-langgraph
-langchain-core
-PyJWT
-cryptography
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+websockets==17.1
+PyJWT==2.14.0
+cryptography==50.0.1
