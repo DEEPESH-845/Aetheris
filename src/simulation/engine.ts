@@ -251,7 +251,7 @@ function createSandboxTwin(threat: { id: string; sourceIp: string }): import('@/
 
 // ─── Phase 6: Defensive Operation Generators ───────────────────────────────────
 
-function createDefensiveOperation(threat: import('@/store/useSimulationStore').Threat): import('@/store/useSimulationStore').DefensiveOperation {
+function createDefensiveOperation(threat: import('@/store/useSimulationStore').Threat, autonomous: boolean): import('@/store/useSimulationStore').DefensiveOperation {
   const actions: import('@/store/useSimulationStore').DefensiveActionType[] = ['ISOLATE_NODE', 'BLOCK_ASN', 'TERMINATE_PROCESS', 'ENFORCE_ZERO_TRUST'];
   const action = randItem(actions);
   const target = action === 'ISOLATE_NODE' ? `Node ${threat.targetNode}` : action === 'BLOCK_ASN' ? `ASN ${randInt(1000, 9999)}` : action === 'TERMINATE_PROCESS' ? `PID ${randInt(1000, 65000)}` : 'API Gateway';
@@ -263,7 +263,10 @@ function createDefensiveOperation(threat: import('@/store/useSimulationStore').T
     target,
     status: 'PENDING',
     startedAt: Date.now(),
-    logs: [`[SYS] Initializing autonomous countermeasure: ${action} against ${target}`],
+    approvedAt: autonomous ? Date.now() : undefined,
+    logs: [autonomous
+      ? `[SYS] Initializing autonomous countermeasure: ${action} against ${target}`
+      : `[SYS] Proposed countermeasure: ${action} against ${target}. Awaiting operator approval.`],
   };
 }
 
@@ -455,13 +458,14 @@ export function useSimulationEngine() {
         const hasIntel = twin?.lifecycle === 'COMBAT' && twin.attackerSessions.length >= 3;
         const existingOp = Object.values(st.defensiveOperations).find(op => op.threatId === threat.id);
         if (hasIntel && !existingOp) {
-          st.addDefensiveOperation(createDefensiveOperation(threat));
+          st.addDefensiveOperation(createDefensiveOperation(threat, st.autonomous));
         }
       });
 
       // Drive lifecycle of defensive operations
       Object.values(st.defensiveOperations).forEach(op => {
-        const age = (Date.now() - op.startedAt) / 1000; // seconds
+        if (!op.approvedAt) return; // human-in-the-loop: nothing moves until approved
+        const age = (Date.now() - op.approvedAt) / 1000; // seconds
 
         if (age >= 2 && age < 6 && op.status === 'PENDING') {
           st.updateOperationStatus(op.id, 'EXECUTING', `[EXEC] Deploying ${op.action} via Ansible...`);

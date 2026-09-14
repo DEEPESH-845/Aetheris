@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure, adminProcedure } from "../trpc";
 import { z } from "zod";
+import { orgSettingsSchema, parseOrgSettings } from "@/lib/org-settings";
 
 export const orgRouter = router({
   getCurrent: protectedProcedure.query(async ({ ctx }) => {
@@ -24,6 +25,21 @@ export const orgRouter = router({
         data: { orgId: ctx.orgId, userId: ctx.userId, action: "org.updated", resource: ctx.orgId, ip: ctx.ip, details: { name: input.name } },
       });
       return org;
+    }),
+
+  getSettings: protectedProcedure.query(async ({ ctx }) => {
+    const org = await ctx.prisma.organization.findUniqueOrThrow({ where: { id: ctx.orgId }, select: { settings: true } });
+    return parseOrgSettings(org.settings);
+  }),
+
+  updateSettings: adminProcedure
+    .input(orgSettingsSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.organization.update({ where: { id: ctx.orgId }, data: { settings: input } });
+      await ctx.prisma.auditLog.create({
+        data: { orgId: ctx.orgId, userId: ctx.userId, action: "org.settings_updated", resource: ctx.orgId, ip: ctx.ip, details: input },
+      });
+      return input;
     }),
 
   listMembers: protectedProcedure.query(async ({ ctx }) => {

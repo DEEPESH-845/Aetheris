@@ -8,6 +8,7 @@ import { StatBlock } from "@/components/shared/StatBlock";
 import { StatusBadge, type StateTone } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { FeedList } from "@/components/shared/FeedList";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDuration, formatTime } from "@/lib/format";
 import { useNow } from "@/lib/use-now";
@@ -38,8 +39,11 @@ function logTone(text: string) {
 export default function DefensiveOpsPage() {
   const defensiveOperations = useSimulationStore((s) => s.defensiveOperations);
   const networkNodes = useSimulationStore((s) => s.networkNodes);
+  const autonomous = useSimulationStore((s) => s.autonomous);
+  const approveOperation = useSimulationStore((s) => s.approveOperation);
   const operations = Object.values(defensiveOperations).sort((a, b) => b.startedAt - a.startedAt);
-  const active = operations.filter((op) => op.status !== "SUCCESS" && op.status !== "FAILED");
+  const awaiting = operations.filter((op) => !op.approvedAt);
+  const active = operations.filter((op) => op.approvedAt && op.status !== "SUCCESS" && op.status !== "FAILED");
   const completed = operations.filter((op) => op.status === "SUCCESS" || op.status === "FAILED");
   const isolated = Object.values(networkNodes).filter((n) => n.status === "isolated");
   const now = useNow();
@@ -50,9 +54,13 @@ export default function DefensiveOpsPage() {
 
   return (
     <div className="flex min-h-0 flex-col gap-4 lg:h-full">
-      <PageHeader title="Defensive operations" description="Countermeasures the system has taken on its own, and what they touched." />
+      <PageHeader
+        title="Defensive operations"
+        description={autonomous ? "Countermeasures the system has taken on its own, and what they touched." : "Proposed countermeasures wait here for your approval before anything runs."}
+      />
 
-      <Panel className="grid grid-cols-3 divide-x">
+      <Panel className="grid grid-cols-4 divide-x">
+        <StatBlock label="Awaiting approval" value={awaiting.length} tone={awaiting.length > 0 ? "accent" : "default"} />
         <StatBlock label="In progress" value={active.length} tone={active.length > 0 ? "accent" : "default"} />
         <StatBlock label="Completed" value={completed.length} tone="success" />
         <StatBlock label="Isolated nodes" value={isolated.length} tone={isolated.length > 0 ? "danger" : "default"} />
@@ -92,7 +100,13 @@ export default function DefensiveOpsPage() {
                             </div>
                           </TableCell>
                           <TableCell className="font-mono text-xs text-ink-muted">{op.target}</TableCell>
-                          <TableCell><StatusBadge label={op.status} tone={st.tone} live={st.live} /></TableCell>
+                          <TableCell>
+                            {op.approvedAt ? (
+                              <StatusBadge label={op.status} tone={st.tone} live={st.live} />
+                            ) : (
+                              <Button size="sm" variant="secondary" onClick={() => approveOperation(op.id)}>Approve</Button>
+                            )}
+                          </TableCell>
                           <TableCell className="text-right font-mono text-xs text-ink-muted">
                             {formatTime(op.startedAt)}
                             <span className="ml-2 text-ink-subtle">{formatDuration(elapsed)}</span>

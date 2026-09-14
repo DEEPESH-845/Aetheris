@@ -118,6 +118,7 @@ export interface DefensiveOperation {
   target: string; // e.g. "Node web-cluster-1" or "ASN 4134"
   status: 'PENDING' | 'EXECUTING' | 'VERIFYING' | 'SUCCESS' | 'FAILED';
   startedAt: number;
+  approvedAt?: number; // unset = waiting for a human when autonomous mitigation is off
   completedAt?: number;
   logs: string[];
 }
@@ -179,6 +180,8 @@ export interface SystemHealth {
 
 interface SimulationState {
   isSimulationRunning: boolean;
+  autonomous: boolean;
+  setAutonomous: (v: boolean) => void;
   globalThreatScore: number;
   networkNodes: Record<string, NetworkNode>;
   activeThreats: Threat[];
@@ -221,6 +224,7 @@ interface SimulationState {
   defensiveOperations: Record<string, DefensiveOperation>;
   addDefensiveOperation: (op: DefensiveOperation) => void;
   updateOperationStatus: (opId: string, status: DefensiveOperation['status'], log?: string) => void;
+  approveOperation: (opId: string) => void;
 }
 
 // Initial mock network
@@ -242,6 +246,8 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   aiThoughts: [],
   networkNodes: initialNodes,
   isSimulationRunning: true,
+  autonomous: true,
+  setAutonomous: (autonomous) => set({ autonomous }),
   systemHealth: {
     cpu: 40,
     networkTraffic: 200,
@@ -416,6 +422,17 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   addDefensiveOperation: (op) => set((state) => ({
     defensiveOperations: { ...state.defensiveOperations, [op.id]: op },
   })),
+
+  approveOperation: (opId) => set((state) => {
+    const op = state.defensiveOperations[opId];
+    if (!op || op.approvedAt) return state;
+    return {
+      defensiveOperations: {
+        ...state.defensiveOperations,
+        [opId]: { ...op, approvedAt: Date.now(), logs: [...op.logs, '[SYS] Approved by operator.'] },
+      },
+    };
+  }),
 
   updateOperationStatus: (opId, status, log) => set((state) => {
     const op = state.defensiveOperations[opId];

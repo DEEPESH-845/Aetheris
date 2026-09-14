@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/utils/trpc";
 import { useSimulationEngine } from "@/simulation/engine";
+import { useSimulationStore } from "@/store/useSimulationStore";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarNav } from "./SidebarNav";
@@ -17,6 +19,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [forceOpen, setForceOpen] = useState(false);
 
   useSimulationEngine();
+  const autonomous = api.org.getSettings.useQuery().data?.autonomous;
+  useEffect(() => {
+    if (autonomous !== undefined) useSimulationStore.getState().setAutonomous(autonomous);
+  }, [autonomous]);
 
   const toggle = () => setSidebarCollapsed(!collapsed);
 

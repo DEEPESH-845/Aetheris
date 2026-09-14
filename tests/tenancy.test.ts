@@ -82,3 +82,19 @@ describe("tenant scoping", () => {
     expect("create" in caller.audit).toBe(false);
   });
 });
+
+describe("org settings", () => {
+  it("persists validated settings, defaults on empty, and rejects non-admins", async () => {
+    const a = await ensureTenant(userA);
+    const owner = appRouter.createCaller({ userId: userA, orgId: a.orgId, role: "OWNER", ip: null, prisma });
+    expect((await owner.org.getSettings()).autonomous).toBe(true);
+    await owner.org.updateSettings({ posture: "severe", aggressiveness: 40, autonomous: false, sensors: { dpi: true, intel: false, insider: true, cloud: false } });
+    const after = await owner.org.getSettings();
+    expect(after).toMatchObject({ posture: "severe", aggressiveness: 40, autonomous: false });
+    expect(after.sensors.intel).toBe(false);
+    const viewer = appRouter.createCaller({ userId: userB, orgId: a.orgId, role: "VIEWER", ip: null, prisma });
+    await expect(viewer.org.updateSettings({ ...after, autonomous: true })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    // @ts-expect-error out-of-range value must be rejected by zod
+    await expect(owner.org.updateSettings({ ...after, aggressiveness: 500 })).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+});
