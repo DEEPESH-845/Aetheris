@@ -27,7 +27,7 @@ export default clerkMiddleware(
       await auth.protect();
     }
   },
-  { contentSecurityPolicy: { strict: true, directives: cspDirectives } },
+  { signInUrl: "/sign-in", signUpUrl: "/sign-up", contentSecurityPolicy: { strict: true, directives: cspDirectives } },
 );
 
 export const config = {
