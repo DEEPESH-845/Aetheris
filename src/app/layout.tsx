@@ -38,6 +38,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider
+      dynamic
       appearance={{
         baseTheme: dark,
         variables: {
