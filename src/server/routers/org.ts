@@ -2,6 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure, adminProcedure } from "../trpc";
 import { z } from "zod";
 import { orgSettingsSchema, parseOrgSettings } from "@/lib/org-settings";
+import { sendEmail } from "../email";
+import { env } from "@/env";
+
+const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export const orgRouter = router({
   getCurrent: protectedProcedure.query(async ({ ctx }) => {
@@ -65,11 +69,39 @@ export const orgRouter = router({
         where: { orgId_email: { orgId: ctx.orgId, email } },
         create: { orgId: ctx.orgId, email, role: input.role, token, expiresAt },
         update: { role: input.role, token, expiresAt, acceptedAt: null },
+        include: { org: { select: { name: true } } },
       });
+      const url = `${env.NEXT_PUBLIC_APP_URL}/invite/${token}`;
+      const orgName = escapeHtml(invitation.org.name);
+      const emailed = await sendEmail(
+        email,
+        `You have been invited to ${invitation.org.name} on Aetheris`,
+        `<p>You have been invited to join <strong>${orgName}</strong> on Aetheris as ${input.role.toLowerCase()}.</p><p><a href="${url}">Accept the invitation</a> (valid for seven days).</p>`,
+      );
       await ctx.prisma.auditLog.create({
-        data: { orgId: ctx.orgId, userId: ctx.userId, action: "member.invited", resource: email, ip: ctx.ip, details: { role: input.role } },
+        data: { orgId: ctx.orgId, userId: ctx.userId, action: "member.invited", resource: email, ip: ctx.ip, details: { role: input.role, emailed } },
       });
-      return invitation;
+      return { id: invitation.id, email, role: invitation.role, expiresAt, url, emailed };
+    }),
+
+  listInvitations: adminProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.prisma.invitation.findMany({
+      where: { orgId: ctx.orgId, acceptedAt: null, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, email: true, role: true, token: true, expiresAt: true },
+    });
+    return rows.map(({ token, ...r }) => ({ ...r, url: `${env.NEXT_PUBLIC_APP_URL}/invite/${token}` }));
+  }),
+
+  revokeInvitation: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { count } = await ctx.prisma.invitation.deleteMany({ where: { id: input.id, orgId: ctx.orgId, acceptedAt: null } });
+      if (count === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Invitation not found." });
+      await ctx.prisma.auditLog.create({
+        data: { orgId: ctx.orgId, userId: ctx.userId, action: "member.invite_revoked", resource: input.id, ip: ctx.ip },
+      });
+      return { id: input.id };
     }),
 
   removeMember: adminProcedure

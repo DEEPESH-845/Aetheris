@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, Trash, Users } from "@phosphor-icons/react";
+import { Check, Copy, EnvelopeSimple, UserPlus, Trash, Users } from "@phosphor-icons/react";
 import { useOrg } from "@/hooks/useOrg";
 import { api } from "@/utils/trpc";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -26,6 +26,26 @@ const roleVariant: Record<string, "accent" | "default" | "outline"> = {
   VIEWER: "outline",
 };
 
+function CopyLink({ url }: { url: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <Button
+      variant="secondary"
+      size="sm"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(url);
+          setDone(true);
+          setTimeout(() => setDone(false), 1500);
+        } catch {}
+      }}
+    >
+      {done ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+      {done ? "Copied" : "Copy link"}
+    </Button>
+  );
+}
+
 export default function MembersPage() {
   const { org } = useOrg();
   const [showInvite, setShowInvite] = useState(false);
@@ -34,13 +54,16 @@ export default function MembersPage() {
   const [pendingRemoval, setPendingRemoval] = useState<{ id: string; email: string } | null>(null);
 
   const listMembers = api.org.listMembers.useQuery();
+  const listInvitations = api.org.listInvitations.useQuery();
   const inviteMember = api.org.inviteMember.useMutation({
     onSuccess: () => {
-      listMembers.refetch();
+      listInvitations.refetch();
       setShowInvite(false);
       setEmail("");
     },
   });
+  const revokeInvitation = api.org.revokeInvitation.useMutation({ onSuccess: () => listInvitations.refetch() });
+  const invitations = listInvitations.data ?? [];
   const removeMember = api.org.removeMember.useMutation({
     onSuccess: () => {
       listMembers.refetch();
@@ -184,6 +207,48 @@ export default function MembersPage() {
           )}
         </PanelBody>
       </Panel>
+
+      {invitations.length > 0 && (
+        <Panel>
+          <PanelHeader
+            title="Pending invitations"
+            actions={
+              <span className="text-xs text-ink-muted">
+                {inviteMember.data?.emailed ? "Invite email sent." : "Share the link directly; email delivery is not configured."}
+              </span>
+            }
+          />
+          <PanelBody padded={false}>
+            <ul className="divide-y">
+              {invitations.map((inv) => (
+                <li key={inv.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <EnvelopeSimple size={16} className="shrink-0 text-ink-subtle" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <div className="truncate font-mono text-xs text-ink">{inv.email}</div>
+                      <div className="text-xs text-ink-muted">
+                        <span className="capitalize">{inv.role.toLowerCase()}</span> · expires {new Date(inv.expiresAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CopyLink url={inv.url} />
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Revoke invitation for ${inv.email}`}
+                      disabled={revokeInvitation.isPending}
+                      onClick={() => revokeInvitation.mutate({ id: inv.id })}
+                    >
+                      <Trash />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </PanelBody>
+        </Panel>
+      )}
 
       <Dialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
         <DialogContent>

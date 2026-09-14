@@ -13,6 +13,9 @@ const schema = z.object({
   NEXT_PUBLIC_BILLING_ENABLED: z.enum(["true", "false"]).default("false"),
   STRIPE_SECRET_KEY: z.string().optional().or(z.literal("").transform(() => undefined)),
   STRIPE_WEBHOOK_SECRET: z.string().optional().or(z.literal("").transform(() => undefined)),
+  // Set by the Resend marketplace integration. Absent locally: invites are shared by link instead.
+  RESEND_API_KEY: z.string().optional().or(z.literal("").transform(() => undefined)),
+  EMAIL_FROM: z.string().default("Aetheris <noreply@aetheris.dev>"),
 });
 
 const parsed = schema.safeParse(process.env);
