@@ -57,6 +57,14 @@ If the decision is "keep the enterprise pitch as a portfolio piece", stop after 
 
 ## 3. Phase 2: core product excellence (no pivot dependency)
 
+Status 2026-09-15: items 1 to 8 landed on branch `phase2-core-product` (eight commits on top of Phase 1).
+Item 9 is a decision, see below.
+Two things need Deepesh's hands:
+
+- Install the Resend marketplace integration (`vercel integration add resend`) so invites are emailed; until then the members page shows a copyable invite link.
+- Rename the Clerk application from "My Application" and upload a logo in the Clerk dashboard; the sign-in card reads the name from there.
+- Production env is missing `DATABASE_URL`, `CRON_SECRET`, `NEXT_PUBLIC_APP_URL` and the Stripe keys (`vercel env ls production` shows only the Clerk keys and the backend URL). `src/env.ts` refuses to boot without `DATABASE_URL`.
+
 Ordered by value.
 Each item is small enough to land in one session.
 
@@ -68,7 +76,7 @@ Each item is small enough to land in one session.
 6. **Engine extraction.** `src/simulation/engine.ts` runs a 300-line orchestrator inside a `setInterval` in a React hook. Extract the tick into a plain module with `start()`/`stop()` so it can be unit tested with fake timers; restart the local generator with backoff when the WebSocket closes (today the UI freezes on the last state).
 7. **Bundle trims.** Remove `framer-motion` (real use is one `AnimatePresence` in `ActiveThreatsList`; three files only use `useReducedMotion`, replace with `matchMedia`). Move `threatTone` and `NAV_GROUPS` out of `SidebarNav.tsx` into `src/lib/`. Every dashboard route ships 700 to 1200 KB of client JS.
 8. **Clerk branding.** The hosted sign-in says "My Application" and "Development mode". Configure the Clerk instance name and logo, and add `/sign-in` and `/sign-up` routes so the flow stays on the domain.
-9. **Backend on Vercel or shelve it.** `NEXT_PUBLIC_BACKEND_WS_URL` is empty locally; if it is also empty in production the Python service is unused. Either delete it until Phase 3 or deploy it and set the env var. Do not keep it half-alive.
+9. **Backend on Vercel or shelve it.** `NEXT_PUBLIC_BACKEND_WS_URL` is empty locally but set (hidden) in Vercel Preview and Production, so something is pointed at. Confirm the Python service is actually running there; if not, delete `backend/` and the CI job until Phase 3. Do not keep it half-alive. The client now resumes the local generator when the socket drops, so a dead URL degrades instead of freezing.
 
 ## 4. Phase 3: real ingest (assumes the pivot)
 
