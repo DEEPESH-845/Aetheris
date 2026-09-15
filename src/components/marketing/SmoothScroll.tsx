@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-media-query";
 import { ScrollSmoother, ScrollTrigger, useGSAP } from "@/lib/gsap";
 
 const HEADER_OFFSET = "top 64px";

@@ -1,3 +1,5 @@
+> Superseded on 2026-09-15 by docs/audit/2026-09-15-phase0-synthesis.md. Section 2.1 is wrong: Next 16 uses `proxy.ts` and it is active.
+
 # AETHERIS SaaS TRANSFORMATION PLAN
 
 **Date**: 2025-07-04

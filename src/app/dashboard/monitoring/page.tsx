@@ -24,6 +24,7 @@ const statusTone: Record<Threat["status"], StateTone> = {
 
 function ThreatMonitor() {
   const incidentLog = useSimulationStore((s) => s.incidentLog);
+  const selectThreat = useSimulationStore((s) => s.selectThreat);
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -53,7 +54,7 @@ function ThreatMonitor() {
   });
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
       <PageHeader title="Threat monitor" description="Every incident the pipeline has raised, with the response it received." />
 
       <div className="flex flex-wrap items-center gap-3">
@@ -109,7 +110,15 @@ function ThreatMonitor() {
               </TableHeader>
               <TableBody>
                 {rows.map((log) => (
-                  <TableRow key={log.id}>
+                  <TableRow
+                    key={log.id}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Open incident ${log.id}`}
+                    onClick={() => selectThreat(log.id)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectThreat(log.id); } }}
+                    className="cursor-pointer focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+                  >
                     <TableCell className="font-mono text-xs text-ink-muted">{formatTime(log.timestamp)}</TableCell>
                     <TableCell><SeverityBadge severity={log.severity} /></TableCell>
                     <TableCell>

@@ -10,7 +10,7 @@ export function StackLogos() {
         <p className="mb-6 text-center text-sm text-ink-muted">Runs on the infrastructure you already have</p>
         <div
           className="group relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
-          aria-label="Supported infrastructure"
+          aria-label="Target infrastructure (planned integrations)"
           role="list"
         >
           <div className="flex w-max gap-14 motion-safe:animate-[marquee_40s_linear_infinite] group-hover:[animation-play-state:paused]">

@@ -37,7 +37,7 @@ export function LivePreview() {
         setTimeout(() => useSimulationStore.getState().updateThreatStatus(DEMO_ID, "ANALYZING"), 1800),
         setTimeout(() => {
           const n = useSimulationStore.getState();
-          n.updateThreatStatus(DEMO_ID, "MITIGATING", "eBPF redirect to honey twin");
+          n.updateThreatStatus(DEMO_ID, "MITIGATING", "Traffic redirected to honey twin");
           n.updateNodeStatus(TARGET, "redirected");
         }, 3600),
         setTimeout(() => {

@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import { QueryProvider } from "@/providers/QueryProvider";
 import { TrpcProvider } from "@/providers/TrpcProvider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -39,6 +38,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider
+      dynamic
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
       appearance={{
         baseTheme: dark,
         variables: {
@@ -71,9 +75,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <a href="#main" className="skip-link">
             Skip to content
           </a>
-          <QueryProvider>
-            <TrpcProvider>{children}</TrpcProvider>
-          </QueryProvider>
+          <TrpcProvider>{children}</TrpcProvider>
         </body>
       </html>
     </ClerkProvider>

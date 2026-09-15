@@ -53,7 +53,7 @@ function Notice({ tone, title, body, onDismiss }: { tone: "success" | "danger"; 
 }
 
 function BillingContent() {
-  const { subscription, plan, isTrialActive, limits, isLoading } = useSubscription();
+  const { subscription, plan, isTrialActive, limits, isLoading, isError } = useSubscription();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +93,7 @@ function BillingContent() {
     }
   }
 
-  const upgrades = UPGRADES[plan] ?? [];
+  const upgrades = process.env.NEXT_PUBLIC_BILLING_ENABLED === "true" ? (UPGRADES[plan] ?? []) : [];
 
   return (
     <div className="flex flex-col gap-4">
@@ -102,6 +102,7 @@ function BillingContent() {
       {checkoutSuccess && <Notice tone="success" title="Payment complete" body="Your subscription is active on the new plan." />}
       {checkoutCanceled && <Notice tone="danger" title="Checkout canceled" body="Nothing was charged. You can start again whenever you like." />}
       {error && <Notice tone="danger" title={error} onDismiss={() => setError(null)} />}
+      {isError && <Notice tone="danger" title="Could not load your plan" body="Billing details are temporarily unavailable. Refresh to try again." />}
 
       <Panel>
         <PanelHeader

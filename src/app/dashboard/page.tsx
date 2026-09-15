@@ -12,7 +12,7 @@ import { TelemetryPacketFeed } from "@/components/dashboard/TelemetryPacketFeed"
 import { NetworkTopology } from "@/components/visualization/NetworkTopology";
 import { ThreatScoreChart } from "@/components/visualization/ThreatScoreChart";
 import { NetworkTrafficChart } from "@/components/visualization/NetworkTrafficChart";
-import { threatTone } from "@/components/app-shell/SidebarNav";
+import { threatTone } from "@/lib/nav";
 
 export default function DashboardPage() {
   const globalThreatScore = useSimulationStore((s) => s.globalThreatScore);
@@ -22,8 +22,8 @@ export default function DashboardPage() {
   const events = useSimulationStore((s) => s.telemetryEvents.length);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
-      <PageHeader title="Command center" description="Live view of detection, deception, and response." />
+    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
+      <PageHeader title="Command center" description="Detection, deception, and response on a simulated network." />
 
       <PipelineStatusBar />
 
@@ -43,10 +43,10 @@ export default function DashboardPage() {
         <StatBlock label="AI confidence" value={confidence} unit="%" hint="Latest reasoning pass" />
       </Panel>
 
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-3">
+      <div className="grid min-h-0 gap-4 lg:flex-1 lg:grid-cols-3">
         <div className="flex min-h-0 flex-col gap-4 lg:col-span-2">
           <Panel className="min-h-[300px] flex-1">
-            <PanelHeader title="Deception map" description="Production on the left, twins on the right" actions={<StatusBadge label="Live" tone="success" live />} />
+            <PanelHeader title="Deception map" description="Production on the left, twins on the right" actions={<StatusBadge label="Simulated" tone="accent" live />} />
             <PanelBody padded={false}>
               <NetworkTopology />
             </PanelBody>

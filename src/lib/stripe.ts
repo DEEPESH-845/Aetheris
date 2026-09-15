@@ -14,12 +14,9 @@ export function getStripe(): Stripe {
   return _stripe;
 }
 
-// For backwards compatibility and direct imports
-export const stripe = new Proxy({} as Stripe, {
-  get(_, prop) {
-    return getStripe()[prop as keyof Stripe];
-  },
-});
+/** Self-serve billing stays off until the product has something real to charge for. */
+export const isStripeConfigured = () =>
+  process.env.NEXT_PUBLIC_BILLING_ENABLED === "true" && Boolean(process.env.STRIPE_SECRET_KEY);
 
 export const PLANS = {
   FREE: { name: "Free", priceId: null, monthlyPriceId: null, yearlyPriceId: null },
@@ -42,11 +39,13 @@ export const PLANS = {
 
 export type PlanType = keyof typeof PLANS;
 
-export function mapPriceToPlan(priceId: string): PlanType {
-  if (priceId.includes("starter")) return "STARTER";
-  if (priceId.includes("pro")) return "PRO";
-  if (priceId.includes("business")) return "BUSINESS";
-  return "FREE";
+/** Reverse map of the configured price ids. Unknown ids return null so callers never guess a plan. */
+export function mapPriceToPlan(priceId: string | undefined): PlanType | null {
+  if (!priceId) return null;
+  for (const [plan, config] of Object.entries(PLANS) as [PlanType, (typeof PLANS)[PlanType]][]) {
+    if (config.monthlyPriceId === priceId || config.yearlyPriceId === priceId) return plan;
+  }
+  return null;
 }
 
 export const PLAN_LIMITS = {

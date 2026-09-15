@@ -46,7 +46,6 @@ model Organization {
   simulations           Simulation[]
   invitations           Invitation[]
 
-  @@index([slug])
 }
 
 model User {
@@ -62,7 +61,6 @@ model User {
   activities    Activity[]
   apiKeys       ApiKey[]
 
-  @@index([email])
 }
 
 model Membership {
@@ -79,7 +77,7 @@ model Membership {
 
   @@unique([userId, orgId])
   @@index([orgId])
-  @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Team {
@@ -120,10 +118,17 @@ model AuditLog {
   ip        String?
   createdAt DateTime @default(now())
 
-  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
 
   @@index([orgId, createdAt])
   @@index([orgId, action])
+}
+
+// Processed Stripe event ids. Primary key makes redelivery a no-op.
+model StripeEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now())
 }
 
 model Activity {

@@ -125,7 +125,7 @@ export default function SandboxPage() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
       <PageHeader
         title="Sandbox lab"
         description="Fire an attack vector, then watch the engine redirect it into a twin."
@@ -166,7 +166,7 @@ export default function SandboxPage() {
         })}
       </ul>
 
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-12">
+      <div className="grid min-h-0 gap-4 lg:flex-1 lg:grid-cols-12">
         <Panel className="min-h-[320px] lg:col-span-8">
           <PanelHeader
             title="Attacker session"

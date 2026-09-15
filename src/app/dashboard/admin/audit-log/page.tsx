@@ -41,7 +41,7 @@ export default function AuditLogPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Audit log" description={`${total} ${total === 1 ? "event" : "events"} recorded for this organization.`} />
+      <PageHeader title="Audit log" description={isError ? "Every administrative action, with who and when." : `${total} ${total === 1 ? "event" : "events"} recorded for this organization.`} />
 
       <Panel>
         <PanelBody padded={false}>

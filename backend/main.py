@@ -7,15 +7,30 @@ import os
 import base64
 import jwt
 from jwt import PyJWKClient
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from ai_core import simulate_ai_reasoning
-from collections import defaultdict
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("aetheris.backend")
 
-app = FastAPI(title="Aetheris Backend", version="3.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    required_envs = ["NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"]
+    missing = [e for e in required_envs if not os.getenv(e)]
+    if missing:
+        logger.critical(f"Missing required env vars: {missing}. WebSocket auth will reject all connections.")
+    else:
+        logger.info("All required environment variables present.")
+    tasks = [asyncio.create_task(generate_telemetry()), asyncio.create_task(consume_telemetry())]
+    yield
+    for t in tasks:
+        t.cancel()
+
+
+app = FastAPI(title="Aetheris Backend", version="3.0", lifespan=lifespan)
 
 frontend_url = os.getenv("FRONTEND_URL")
 allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
@@ -33,52 +48,73 @@ app.add_middleware(
 # ─── Rate Limiter ───────────────────────────────────────────────────────────────
 
 class RateLimiter:
+    """Sliding window keyed by authenticated user id. Empty windows are evicted so the dict stays bounded."""
+
     def __init__(self, max_requests: int, window_seconds: int):
         self.max_requests = max_requests
         self.window = window_seconds
-        self.requests: dict[str, list[float]] = defaultdict(list)
+        self.requests: dict[str, list[float]] = {}
 
     def is_allowed(self, key: str) -> bool:
         now = time.time()
-        self.requests[key] = [t for t in self.requests[key] if now - t < self.window]
-        if len(self.requests[key]) >= self.max_requests:
+        window = [t for t in self.requests.get(key, []) if now - t < self.window]
+        if len(window) >= self.max_requests:
+            self.requests[key] = window
             return False
-        self.requests[key].append(now)
+        window.append(now)
+        self.requests[key] = window
         return True
 
-# Global: 100 WebSocket messages/min per IP
+    def forget(self, key: str) -> None:
+        self.requests.pop(key, None)
+
+# Global: 100 WebSocket messages/min per user
 ws_limiter = RateLimiter(max_requests=100, window_seconds=60)
-# Sandbox provisioning: 5 req/min per IP
+# Sandbox provisioning: 5 req/min per user
 sandbox_limiter = RateLimiter(max_requests=5, window_seconds=60)
 
 # ─── JWT Verification ───────────────────────────────────────────────────────────
 
-def get_jwks_client():
+def get_clerk_domain() -> str | None:
     pub_key = os.getenv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY")
     if not pub_key:
         return None
     try:
         b64_str = pub_key.split('_')[2]
-        padded = b64_str + '=' * (4 - len(b64_str) % 4)
-        domain = base64.b64decode(padded).decode('utf-8').strip('$')
-        return PyJWKClient(f"https://{domain}/.well-known/jwks.json")
+        padded = b64_str + '=' * (-len(b64_str) % 4)
+        return base64.b64decode(padded).decode('utf-8').strip('$')
     except Exception as e:
-        logger.error(f"Failed to setup JWKS client: {e}")
+        logger.error(f"Failed to parse Clerk publishable key: {e}")
         return None
 
-jwks_client = get_jwks_client()
+clerk_domain = get_clerk_domain()
+jwks_client = PyJWKClient(f"https://{clerk_domain}/.well-known/jwks.json", cache_keys=True) if clerk_domain else None
 
-async def verify_token(token: str) -> bool:
+def _decode_token(token: str) -> dict:
+    signing_key = jwks_client.get_signing_key_from_jwt(token)
+    claims = jwt.decode(
+        token,
+        signing_key.key,
+        algorithms=["RS256"],
+        issuer=f"https://{clerk_domain}",
+        options={"verify_aud": False, "require": ["exp", "iat", "sub", "iss"]},
+    )
+    azp = claims.get("azp")
+    if azp and azp not in allowed_origins:
+        raise jwt.InvalidTokenError(f"azp {azp} not in allowed origins")
+    return claims
+
+async def verify_token(token: str) -> str | None:
+    """Returns the subject (user id) for a valid token, else None. JWKS fetch runs off the event loop."""
     if not jwks_client:
         logger.critical("REJECTING: No JWKS client configured. Set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.")
-        return False
+        return None
     try:
-        signing_key = jwks_client.get_signing_key_from_jwt(token)
-        jwt.decode(token, signing_key.key, algorithms=["RS256"], options={"verify_aud": False})
-        return True
+        claims = await asyncio.to_thread(_decode_token, token)
+        return claims["sub"]
     except Exception as e:
         logger.error(f"JWT Verification failed: {e}")
-        return False
+        return None
 
 # ─── Telemetry Queue ────────────────────────────────────────────────────────────
 
@@ -90,8 +126,8 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: list[WebSocket] = []
 
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
+    def register(self, websocket: WebSocket):
+        """Only authenticated sockets receive broadcasts."""
         self.active_connections.append(websocket)
         logger.info(f"Client connected. Total: {len(self.active_connections)}")
 
@@ -101,11 +137,14 @@ class ConnectionManager:
         logger.info(f"Client disconnected. Total: {len(self.active_connections)}")
 
     async def broadcast(self, message: dict):
-        for connection in self.active_connections[:]:
+        # Serialize once; one slow client must not stall delivery to the rest.
+        payload = json.dumps(message)
+        async def send(connection: WebSocket):
             try:
-                await connection.send_json(message)
+                await asyncio.wait_for(connection.send_text(payload), timeout=2.0)
             except Exception as e:
                 logger.error(f"Error broadcasting to client: {e}")
+        await asyncio.gather(*(send(c) for c in self.active_connections[:]))
                 
     async def send_personal_message(self, message: dict, websocket: WebSocket):
         try:
@@ -251,6 +290,8 @@ async def simulate_ebpf_telemetry(websocket: WebSocket, environment_id: str):
     
     for _ in range(50):
         await asyncio.sleep(random.uniform(0.1, 0.8))
+        if websocket not in manager.active_connections:
+            return
         await manager.send_personal_message({
             "type": "EBPF_LOG",
             "data": {
@@ -263,20 +304,6 @@ async def simulate_ebpf_telemetry(websocket: WebSocket, environment_id: str):
             }
         }, websocket)
 
-# ─── Startup Validation ─────────────────────────────────────────────────────────
-
-@app.on_event("startup")
-async def startup_event():
-    required_envs = ["NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"]
-    missing = [e for e in required_envs if not os.getenv(e)]
-    if missing:
-        logger.critical(f"Missing required env vars: {missing}. WebSocket auth will reject all connections.")
-    else:
-        logger.info("All required environment variables present.")
-    
-    asyncio.create_task(generate_telemetry())
-    asyncio.create_task(consume_telemetry())
-
 # ─── Endpoints ──────────────────────────────────────────────────────────────────
 
 @app.get("/")
@@ -285,28 +312,34 @@ async def root():
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    
+    origin = websocket.headers.get("origin")
+    if origin and origin not in allowed_origins:
+        await websocket.close(code=1008, reason="Origin not allowed")
+        return
+    await websocket.accept()
+
+    user_id: str | None = None
     try:
         auth_msg = await asyncio.wait_for(websocket.receive_text(), timeout=3.0)
         auth_payload = json.loads(auth_msg)
-        if auth_payload.get("type") != "AUTH" or not await verify_token(auth_payload.get("token", "")):
+        if auth_payload.get("type") == "AUTH":
+            user_id = await verify_token(auth_payload.get("token", ""))
+        if not user_id:
             raise Exception("Invalid or missing token")
     except Exception as e:
         logger.warning(f"WebSocket auth failed: {e}")
-        manager.disconnect(websocket)
         await websocket.close(code=1008, reason="Unauthorized")
         return
 
-    client_ip = websocket.client.host if websocket.client else "unknown"
+    manager.register(websocket)
 
     try:
         while True:
             data = await websocket.receive_text()
 
             # Global rate limiting for all WebSocket messages
-            if not ws_limiter.is_allowed(client_ip):
-                logger.warning(f"Global rate limit exceeded for {client_ip}")
+            if not ws_limiter.is_allowed(user_id):
+                logger.warning(f"Global rate limit exceeded for {user_id}")
                 continue
 
             try:
@@ -321,8 +354,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     continue
 
                 if msg_type == "PROVISION_SANDBOX":
-                    if not sandbox_limiter.is_allowed(client_ip):
-                        logger.warning(f"Sandbox rate limit exceeded for {client_ip}")
+                    if not sandbox_limiter.is_allowed(user_id):
+                        logger.warning(f"Sandbox rate limit exceeded for {user_id}")
                         continue
 
                     env_id = payload.get("envId")
@@ -337,4 +370,8 @@ async def websocket_endpoint(websocket: WebSocket):
             except Exception as e:
                 logger.error(f"Error processing websocket message: {e}")
     except WebSocketDisconnect:
+        pass
+    finally:
         manager.disconnect(websocket)
+        ws_limiter.forget(user_id)
+        sandbox_limiter.forget(user_id)

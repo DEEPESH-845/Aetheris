@@ -13,19 +13,18 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useSimulationStore } from "@/store/useSimulationStore";
-import { NAV_GROUPS } from "./SidebarNav";
-import { useForceDefense } from "./TopBar";
+import { NAV_GROUPS } from "@/lib/nav";
 
 interface CommandPaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onForceDefense: () => void;
 }
 
-export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
+export function CommandPalette({ open, onOpenChange, onForceDefense }: CommandPaletteProps) {
   const router = useRouter();
   const isRunning = useSimulationStore((s) => s.isSimulationRunning);
   const toggleSimulation = useSimulationStore((s) => s.toggleSimulation);
-  const forceDefense = useForceDefense();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -60,7 +59,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           </CommandGroup>
         ))}
         <CommandGroup heading="Actions">
-          <CommandItem value="Force defense" onSelect={() => run(forceDefense)}>
+          <CommandItem value="Force defense" onSelect={() => run(onForceDefense)}>
             <ShieldSlash aria-hidden="true" />
             Force defense
           </CommandItem>

@@ -1,28 +1,17 @@
 "use client";
 
 import { useId, useState } from "react";
+import { api } from "@/utils/trpc";
+import { useSimulationStore } from "@/store/useSimulationStore";
+import { POSTURES, SENSORS, type OrgSettings } from "@/lib/org-settings";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/Panel";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-
-const POSTURES = [
-  { id: "critical", label: "Critical", hint: "Isolate on first signal. Expect false positives." },
-  { id: "severe", label: "Severe", hint: "Redirect on correlation, isolate on confirmation." },
-  { id: "elevated", label: "Elevated", hint: "Redirect after enrichment; no automatic isolation." },
-  { id: "guarded", label: "Guarded", hint: "Observe and profile; act only on critical severity." },
-  { id: "standard", label: "Standard", hint: "Baseline monitoring with deception armed." },
-];
-
-const SENSORS = [
-  { id: "dpi", label: "Deep packet inspection" },
-  { id: "intel", label: "Correlate external threat intel feeds" },
-  { id: "insider", label: "Monitor insider threat vectors" },
-  { id: "cloud", label: "Real-time cloud asset discovery" },
-];
 
 function ToggleRow({ id, label, hint, checked, onChange }: { id: string; label: string; hint?: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -38,23 +27,40 @@ function ToggleRow({ id, label, hint, checked, onChange }: { id: string; label: 
 
 export default function SettingsPage() {
   const sliderId = useId();
-  const [aggressiveness, setAggressiveness] = useState(80);
-  const [autonomous, setAutonomous] = useState(true);
-  const [posture, setPosture] = useState("standard");
-  const [sensors, setSensors] = useState<Record<string, boolean>>(Object.fromEntries(SENSORS.map((s) => [s.id, true])));
+  const settings = api.org.getSettings.useQuery();
+  // Unsaved edits layered over the server copy; no effect needed to seed local state.
+  const [edits, setEdits] = useState<Partial<OrgSettings>>({});
   const [saved, setSaved] = useState(false);
+  const utils = api.useUtils();
+  const update = api.org.updateSettings.useMutation({
+    onSuccess: (data) => {
+      utils.org.getSettings.setData(undefined, data);
+      setEdits({});
+      useSimulationStore.getState().setAutonomous(data.autonomous);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    },
+  });
 
-  const save = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-  };
+  const draft = settings.data ? { ...settings.data, ...edits } : null;
+
+  if (!draft) {
+    return (
+      <div className="flex flex-col gap-4">
+        <PageHeader title="Configuration" description="How aggressively the engine acts, and which sensors feed it." />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+  const { aggressiveness, autonomous, posture, sensors } = draft;
+  const patch = (p: Partial<OrgSettings>) => setEdits((d) => ({ ...d, ...p }));
 
   return (
     <form
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        save();
+        update.mutate(draft);
       }}
     >
       <PageHeader
@@ -62,10 +68,12 @@ export default function SettingsPage() {
         description="How aggressively the engine acts, and which sensors feed it."
         actions={
           <div className="flex items-center gap-3">
-            <span aria-live="polite" className="text-sm text-success">
-              {saved ? "Saved" : ""}
+            <span aria-live="polite" className={cn("text-sm", update.error ? "text-danger" : "text-success")}>
+              {update.error ? update.error.message : saved ? "Saved" : ""}
             </span>
-            <Button type="submit">Save configuration</Button>
+            <Button type="submit" disabled={update.isPending}>
+              {update.isPending ? "Saving" : "Save configuration"}
+            </Button>
           </div>
         }
       />
@@ -85,7 +93,7 @@ export default function SettingsPage() {
                 min={0}
                 max={100}
                 value={aggressiveness}
-                onValueChange={(v) => setAggressiveness(Array.isArray(v) ? v[0] : v)}
+                onValueChange={(v) => patch({ aggressiveness: Array.isArray(v) ? v[0] : v })}
                 aria-label="Response aggressiveness"
               />
               <p className="text-xs text-ink-muted">Higher values cut response latency at the cost of more false positives.</p>
@@ -96,7 +104,7 @@ export default function SettingsPage() {
                 label="Autonomous mitigation"
                 hint="Execute countermeasures without human approval."
                 checked={autonomous}
-                onChange={setAutonomous}
+                onChange={(v) => patch({ autonomous: v })}
               />
             </div>
           </PanelBody>
@@ -123,7 +131,7 @@ export default function SettingsPage() {
                           name="posture"
                           value={p.id}
                           checked={selected}
-                          onChange={() => setPosture(p.id)}
+                          onChange={() => patch({ posture: p.id })}
                           className="mt-1 size-3.5 accent-accent"
                         />
                         <span className="flex flex-col">
@@ -143,7 +151,7 @@ export default function SettingsPage() {
           <PanelHeader title="Telemetry sensors" />
           <PanelBody className="divide-y py-1">
             {SENSORS.map((s) => (
-              <ToggleRow key={s.id} id={s.id} label={s.label} checked={sensors[s.id]} onChange={(v) => setSensors((prev) => ({ ...prev, [s.id]: v }))} />
+              <ToggleRow key={s.id} id={s.id} label={s.label} checked={sensors[s.id]} onChange={(v) => patch({ sensors: { ...sensors, [s.id]: v } })} />
             ))}
           </PanelBody>
         </Panel>

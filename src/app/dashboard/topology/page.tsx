@@ -30,7 +30,7 @@ export default function TopologyPage() {
   const redirected = nodes.filter((n) => n.status === "redirected").length;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4 lg:h-full">
       <PageHeader
         title="Network topology"
         description="Live asset state and the paths an attacker is being steered along."

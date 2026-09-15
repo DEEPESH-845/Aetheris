@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useSyncExternalStore } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-media-query";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { sceneState } from "./scene/scene-state";
@@ -9,17 +9,17 @@ import { sceneState } from "./scene/scene-state";
 const STEPS = [
   {
     title: "Detect",
-    body: "Zeek, Suricata, and eBPF probes stream into Kafka. The AI core correlates the signal against MITRE ATT&CK in under a second.",
+    body: "Network, IDS, and host telemetry is correlated against MITRE ATT&CK. In the current release this pipeline is simulated end to end so you can evaluate the workflow.",
     meta: "web-cluster-1  ·  T1110 brute force  ·  confidence 91%",
   },
   {
     title: "Redirect",
-    body: "Cilium rewrites the socket in the kernel. The attacker's live session moves to a twin without dropping the TCP handshake.",
+    body: "The attacker's session is steered away from production into a decoy that looks like the targeted host. The kernel-level redirect is the planned mechanism; today the dashboard shows it as a simulation.",
     meta: "sock_redirect  ·  10.0.4.12 → honey-web-01  ·  0 packets lost",
   },
   {
     title: "Deceive",
-    body: "Terraform and Ansible stand up a Proxmox twin of the targeted host, seeded with believable data and planted credentials.",
+    body: "A twin of the targeted host is stood up and seeded with believable data and planted credentials, so the attacker keeps working while production stays untouched.",
     meta: "honey-web-01  ·  4 vCPU  ·  planted: ~/.aws/credentials",
   },
   {
